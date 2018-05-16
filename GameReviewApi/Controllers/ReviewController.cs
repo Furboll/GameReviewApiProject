@@ -14,7 +14,6 @@ namespace GameReviewApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllReviews()
         {
-            await return Ok();
         }
     }
 }
