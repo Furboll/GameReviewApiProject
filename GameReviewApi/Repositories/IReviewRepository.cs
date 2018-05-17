@@ -7,5 +7,6 @@ namespace GameReviewApi.Repositories
 {
     interface IReviewRepository
     {
+        
     }
 }
