@@ -8,7 +8,7 @@ using GameReviewApi.Models;
 
 namespace GameReviewApi.Repositories
 {
-    public class ReviewRepository
+    public class ReviewRepository : IReviewRepository
     {
         private ReviewContext _context;
 

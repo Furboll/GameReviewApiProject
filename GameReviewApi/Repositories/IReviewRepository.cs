@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace GameReviewApi.Repositories
 {
-    interface IReviewRepository
+    public interface IReviewRepository
     {
         
     }
