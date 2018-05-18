@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using GameReviewApi.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 
 namespace GameReviewApi
 {
@@ -36,6 +37,29 @@ namespace GameReviewApi
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseExceptionHandler(appBuilder =>
+                {
+                    appBuilder.Run(async context =>
+                    {
+                        context.Response.StatusCode = 500;
+                        await context.Response.WriteAsync("Error, try again later!");
+                    });
+                });
+            }
+
+            //Add a seed menthod for data
+
+            AutoMapper.Mapper.Initialize(cfg =>
+            {
+                cfg.CreateMap<Models.Review, Models.ReviewDto>()
+                .ForMember(dest => dest.Author, opt => opt.MapFrom(src =>
+                $"{src.Author}"))
+                .ForMember(dest => dest.DatePosted, opt => opt.MapFrom(src => 
+                src.DatePosted.ToString("dd/MM/yyyy"))
+                );
+            });
 
             app.UseMvc();
         }

@@ -37,9 +37,11 @@ namespace GameReviewApi.Repositories
             return await _context.Reviews.OrderByDescending(r => r.DatePosted).FirstOrDefaultAsync();
         }
 
-        public async Task<Review> GetReviewCommentsAsync()
+        public static async Task CreateReview(Review review)
         {
-            return null;
+            await _context.Reviews.AddAsync(review);
+            await _context.SaveChangesAsync();
+
         }
 
         public async Task<Review> EditReviewAsync()
