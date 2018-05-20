@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GameReviewApi.Models
+namespace GameReviewApi.Entities
 {
     public class Comment
     {

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GameReviewApi.Models
+namespace GameReviewApi.Entities
 {
     public class Review
     {
         public int Id { get; set; }
-        //public string Name { get; set; } <-- not sure if needed
+        public string ReviewTitle { get; set; }
         public string Author { get; set; }
         public string VideoUrl { get; set; }
         public string Introduction { get; set; }

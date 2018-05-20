@@ -44,7 +44,7 @@ namespace GameReviewApi
                     appBuilder.Run(async context =>
                     {
                         context.Response.StatusCode = 500;
-                        await context.Response.WriteAsync("Error, try again later!");
+                        await context.Response.WriteAsync("A server error happened. Please try again later!");
                     });
                 });
             }
@@ -53,7 +53,7 @@ namespace GameReviewApi
 
             AutoMapper.Mapper.Initialize(cfg =>
             {
-                cfg.CreateMap<Models.Review, Models.ReviewDto>()
+                cfg.CreateMap<Entities.Review, Models.ReviewDto>()
                 .ForMember(dest => dest.Author, opt => opt.MapFrom(src =>
                 $"{src.Author}"))
                 .ForMember(dest => dest.DatePosted, opt => opt.MapFrom(src => 

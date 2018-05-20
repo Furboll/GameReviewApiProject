@@ -6,11 +6,12 @@ using GameReviewApi.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using GameReviewApi.Models;
+using AutoMapper;
 
 namespace GameReviewApi.Controllers
 {
     [Produces("application/json")]
-    [Route("api/review")]
+    [Route("api/reviews")]
     public class ReviewController : Controller
     {
         public IReviewRepository _reviewRepository;
@@ -23,16 +24,20 @@ namespace GameReviewApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetReviews()
         {
-            var reviews = await _reviewRepository.GetReviews();
-            return Ok(reviews);
+            var reviewsFromDb = await _reviewRepository.GetAllReviewsAsync();
+
+            var reviews = Mapper.Map<IEnumerable<ReviewDto>>(reviewsFromDb);
+
+            return new JsonResult(reviews);
+            //return Ok(reviews);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetReview(int id)
         {
-            var review = await _reviewRepository.GetReview(id);
+            var reviewFromDb = await _reviewRepository.FindReviewByIdAsync(id);
 
-            if (review == null)
+            if (reviewFromDb == null)
             {
                 return NotFound();
             }
@@ -40,7 +45,7 @@ namespace GameReviewApi.Controllers
             //var reviewDTO = Mapper.Map<AuthorDto>(review);
             //retirn Ok(reviewDTO);
 
-            return Ok(review);
+            return Ok(reviewFromDb); //replace this with above code
         }
 
         [HttpPost]
@@ -50,6 +55,8 @@ namespace GameReviewApi.Controllers
             {
                 return BadRequest();
             }
+
+            return Ok();
 
         }
     }

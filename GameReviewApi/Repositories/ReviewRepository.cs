@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GameReviewApi.Data;
-using GameReviewApi.Models;
+using GameReviewApi.Entities;
 
 namespace GameReviewApi.Repositories
 {
@@ -19,7 +19,7 @@ namespace GameReviewApi.Repositories
 
         public async Task<List<Review>> GetAllReviewsAsync()
         {
-            return await _context.Reviews.AsNoTracking().ToListAsync();
+            return await _context.Reviews.ToListAsync();
         }
 
         public async Task<Review> FindReviewByIdAsync(int id)
@@ -37,14 +37,14 @@ namespace GameReviewApi.Repositories
             return await _context.Reviews.OrderByDescending(r => r.DatePosted).FirstOrDefaultAsync();
         }
 
-        public static async Task CreateReview(Review review)
+        public async Task CreateReview(Review review)
         {
             await _context.Reviews.AddAsync(review);
             await _context.SaveChangesAsync();
 
         }
 
-        public async Task<Review> EditReviewAsync()
+        public async Task<Review> EditReviewAsync(int id)
         {
             return null;
         }
