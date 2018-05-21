@@ -21,17 +21,39 @@ namespace GameReviewApi.Controllers
             _reviewRepository = reviewRepository;
         }
 
-        
-        public async Task<IActionResult> GetGameReview(int reviewId)
+        [HttpGet()]
+        public async Task<IActionResult> GetReviewsForGame(int reviewId)
         {
-            if (!_reviewRepository.ReviewExists(reviewId))
+            if (await _reviewRepository.ReviewExists(reviewId) == false)
             {
                 return NotFound();
             }
 
-            var gameForReviewFromDb = _reviewRepository.FindReviewByGameAsync(reviewId);
+            var gameForReviewFromDb = _reviewRepository.GetReviewByGameIdAsync(reviewId);
 
-            var gameForReview = Mapper.Map<IEnumerable<GameDto>>(gameReviewFromDb);
+            var gameForReview = Mapper.Map<IEnumerable<GameDto>>(gameForReviewFromDb);
+
+            return Ok(gameForReview);
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetReviewForGame(int reviewId, int id)
+        {
+            if (await _reviewRepository.ReviewExists(reviewId) == false)
+            {
+                return NotFound();
+            }
+
+            var gameReviewFromRepo = await _reviewRepository.GetReviewByGameIdAsync(id);
+            if (gameReviewFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            var reviewForGame = Mapper.Map<GameDto>(gameReviewFromRepo); //<-- needs to change most prob
+
+            return Ok(reviewForGame);
+        }
+
     }
 }

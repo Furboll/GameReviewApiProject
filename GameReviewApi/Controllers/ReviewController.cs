@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using GameReviewApi.Models;
 using AutoMapper;
+using GameReviewApi.Entities;
 
 namespace GameReviewApi.Controllers
 {
@@ -24,7 +25,7 @@ namespace GameReviewApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetReviews()
         {
-            var reviewsFromDb = await _reviewRepository.GetAllReviewsAsync();
+            var reviewsFromDb = await _reviewRepository.GetAllReviews();
 
             var reviews = Mapper.Map<IEnumerable<ReviewDto>>(reviewsFromDb);
 
@@ -35,17 +36,17 @@ namespace GameReviewApi.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetReview(int id)
         {
-            var reviewFromDb = await _reviewRepository.FindReviewByIdAsync(id);
+            var reviewFromDb = await _reviewRepository.FindReviewById(id);
 
             if (reviewFromDb == null)
             {
                 return NotFound();
             }
 
-            //var reviewDTO = Mapper.Map<AuthorDto>(review);
-            //retirn Ok(reviewDTO);
+            var reviewDTO = Mapper.Map<ReviewDto>(reviewFromDb);
+            return Ok(reviewDTO);
 
-            return Ok(reviewFromDb); //replace this with above code
+            //return Ok(reviewFromDb); //replace this with above code
         }
 
         [HttpPost]
@@ -56,7 +57,19 @@ namespace GameReviewApi.Controllers
                 return BadRequest();
             }
 
-            return Ok();
+            var reviewEntity = Mapper.Map<Review>(review);
+
+            await _reviewRepository.AddReview(reviewEntity);
+
+            if (!await _reviewRepository.Save())
+            {
+                throw new Exception("Creating a review failed on save.");
+            }
+
+            var reviewToReturn = Mapper.Map<ReviewDto>(reviewEntity);
+
+            return CreatedAtRoute("GetReview",
+                new { id = reviewToReturn.Id }, reviewToReturn);
 
         }
     }

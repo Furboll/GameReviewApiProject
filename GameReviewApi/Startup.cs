@@ -59,6 +59,10 @@ namespace GameReviewApi
                 .ForMember(dest => dest.DatePosted, opt => opt.MapFrom(src => 
                 src.DatePosted.ToString("dd/MM/yyyy"))
                 );
+
+                cfg.CreateMap<Entities.Game, Models.GameDto>();
+
+                cfg.CreateMap<Models.ReviewForCreationDto, Entities.Review>();
             });
 
             app.UseMvc();
