@@ -22,37 +22,73 @@ namespace GameReviewApi.Controllers
         }
 
         [HttpGet()]
-        public async Task<IActionResult> GetReviewsForGame(int reviewId)
+        public async Task<IActionResult> GetReviewedGames(int reviewId)
         {
-            if (await _reviewRepository.ReviewExists(reviewId) == false)
+            if (!await _reviewRepository.ReviewExists(reviewId))
             {
                 return NotFound();
             }
 
-            var gameForReviewFromDb = _reviewRepository.GetReviewByGameIdAsync(reviewId);
+            var gameForReviewFromDb = _reviewRepository.GetReviewByGameId(gameId, reviewId);
 
             var gameForReview = Mapper.Map<IEnumerable<GameDto>>(gameForReviewFromDb);
 
             return Ok(gameForReview);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetReviewForGame(int reviewId, int id)
+        [HttpGet("{id}", Name = "GetReviewForGame")]
+        public async Task<IActionResult> GetReviewForGame(int reviewId, int gameId)
         {
-            if (await _reviewRepository.ReviewExists(reviewId) == false)
+            if (!await _reviewRepository.ReviewExists(reviewId))
             {
                 return NotFound();
             }
 
-            var gameReviewFromRepo = await _reviewRepository.GetReviewByGameIdAsync(id);
+            var gameReviewFromRepo = await _reviewRepository.GetReviewByGameId(gameId, reviewId);
             if (gameReviewFromRepo == null)
             {
                 return NotFound();
             }
 
-            var reviewForGame = Mapper.Map<GameDto>(gameReviewFromRepo); //<-- needs to change most prob
+            var reviewForGame = Mapper.Map<GameDto>(gameReviewFromRepo); //<-- needs to change most prob... cept I forgot to what X_X
 
             return Ok(reviewForGame);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteGame(int reviewId, int gameId)
+        {
+            if (!await _reviewRepository.ReviewExists(reviewId))
+            {
+                return NotFound();
+            }
+
+            var gameForReviewFromRepo = await _reviewRepository.GetGameByReviewId(gameId, reviewId);
+            if (gameForReviewFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            await _reviewRepository.DeleteGame(gameForReviewFromRepo);
+
+            if (!await _reviewRepository.Save())
+            {
+
+                throw new Exception($"Deleting game {gameId} for review {reviewId} failed on save");
+            }
+
+            return NoContent();
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateGame(int gameId, [FromBody] GameForUpdateDto game)
+        {
+            if (game == null)
+            {
+                return BadRequest();
+            }
+
+
         }
 
     }

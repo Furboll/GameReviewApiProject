@@ -29,14 +29,14 @@ namespace GameReviewApi.Controllers
 
             var reviews = Mapper.Map<IEnumerable<ReviewDto>>(reviewsFromDb);
 
-            return new JsonResult(reviews);
-            //return Ok(reviews);
+            //return new JsonResult(reviews);
+            return Ok(reviews);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name ="GetReview")]
         public async Task<IActionResult> GetReview(int id)
         {
-            var reviewFromDb = await _reviewRepository.FindReviewById(id);
+            var reviewFromDb = await _reviewRepository.GetReviewById(id);
 
             if (reviewFromDb == null)
             {
@@ -71,6 +71,26 @@ namespace GameReviewApi.Controllers
             return CreatedAtRoute("GetReview",
                 new { id = reviewToReturn.Id }, reviewToReturn);
 
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteReview(int id)
+        {
+            var reviewFromRepo = await _reviewRepository.GetReviewById(id);
+
+            if (reviewFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            await _reviewRepository.DeleteReview(reviewFromRepo);
+
+            if (!await _reviewRepository.Save())
+            {
+                throw new Exception($"Deleting review {id} failed on save.");
+            }
+
+            return NoContent();
         }
     }
 }

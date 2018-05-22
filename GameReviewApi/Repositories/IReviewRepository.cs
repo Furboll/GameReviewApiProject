@@ -10,25 +10,26 @@ namespace GameReviewApi.Repositories
     {
         Task AddReview(Review review);
         Task<IEnumerable<Review>> GetAllReviews();
-        Task<Review> FindReviewById(int Id);
-        Task<Review> FindReviewByGameId();
-        Task RemoveReview(int id);
-        Task Update(Review review);
+        Task<Review> GetReviewById(int reviewId);
+        Task<Review> GetReviewByGameId(int gameId, int reviewId);
+        Task DeleteReview(Review review);
+        Task UpdateReview(Review review);
 
         Task AddGame(Game game);
         Task<IEnumerable<Game>> GetAllGames();
-        Task<Game> FindGameById(int Id);
-        Task<Game> FindGameByReviewId();
-        Task RemoveGame(int id);
-        Task Update(Game game);
+        Task<Game> GetGameById(int gameId);
+        Task<Game> GetGameByReviewId(int gameId, int reviewId);
+        Task DeleteGame(Game game);
+        Task UpdateGame(Game game);
 
         Task AddComment(Comment comment);
         Task<IEnumerable<Comment>> GetAllComments();
-        Task<Comment> FindCommentById(int Id);
-        Task<Comment> FindCommentsByReviewId();
-        Task RemoveComment(int id);
-        Task Update(Comment comment);
+        Task<Comment> GetCommentById(int commentId);
+        Task<Comment> GetCommentsByReviewId(int reviewId, int commentId);
+        Task DeleteComment(Comment comment);
+        Task UpdateComment(Comment comment);
 
+        Task<bool> ReviewExists(int reviewId);
         Task<bool> Save();
         //Task<bool> ReviewExists(int reviewId);
         //Task<Review> EditReviewAsync(int id);
