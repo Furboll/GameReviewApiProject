@@ -24,8 +24,9 @@ namespace GameReviewApi.Data
                 .HasForeignKey<Game>(g => g.ReviewId);
 
             modelBuilder.Entity<Review>()
-                .HasMany(r => r.Comments)
-                .WithOne();
+                .HasMany(c => c.Comments)
+                .WithOne(r => r.Review)
+                .HasForeignKey(c => c.ReviewId);
 
             modelBuilder.Entity<Game>().ToTable("Game");
             modelBuilder.Entity<Review>().ToTable("Review");

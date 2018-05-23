@@ -56,13 +56,22 @@ namespace GameReviewApi
                 cfg.CreateMap<Entities.Review, Models.ReviewDto>()
                 .ForMember(dest => dest.Author, opt => opt.MapFrom(src =>
                 $"{src.Author}"))
-                .ForMember(dest => dest.DatePosted, opt => opt.MapFrom(src => 
-                src.DatePosted.ToString("dd/MM/yyyy"))
-                );
+                .ForMember(dest => dest.DatePosted, opt => opt.MapFrom(src =>
+                src.DatePosted.ToString("dd/MM/yyyy")));
+
+                cfg.CreateMap<Entities.Game, Models.GameDto>()
+                .ForMember(dest => dest.ReleaseDate, opt => opt.MapFrom(src => src.ReleaseDate.ToShortDateString()));
+
+                cfg.CreateMap<Entities.Comment, Models.CommentDto>()
+                .ForMember(dest => dest.DatePosted, opt => opt.MapFrom(src => src.DatePosted.ToShortDateString()));
 
                 cfg.CreateMap<Entities.Game, Models.GameDto>();
 
                 cfg.CreateMap<Models.ReviewForCreationDto, Entities.Review>();
+
+                cfg.CreateMap<Models.ReviewForCreationDto, Entities.Game>();
+
+                cfg.CreateMap<Models.GameForUpdateDto, Entities.Game>();
             });
 
             app.UseMvc();

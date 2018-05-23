@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using GameReviewApi.Models;
 using AutoMapper;
 using GameReviewApi.Entities;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace GameReviewApi.Controllers
 {
@@ -88,6 +89,75 @@ namespace GameReviewApi.Controllers
             if (!await _reviewRepository.Save())
             {
                 throw new Exception($"Deleting review {id} failed on save.");
+            }
+
+            return NoContent();
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateReview(int reviewId, [FromBody] ReviewForUpdateDto review)
+        {
+            if (review == null)
+            {
+                return BadRequest();
+            }
+
+            if (!await _reviewRepository.ReviewExists(reviewId))
+            {
+                return NotFound();
+            }
+
+            var reviewForGameFromRepo = await _reviewRepository.GetReviewById(reviewId);
+            if (reviewForGameFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            Mapper.Map(review, reviewForGameFromRepo);
+
+            await _reviewRepository.UpdateReview(reviewForGameFromRepo);
+
+            if (!await _reviewRepository.Save())
+            {
+                throw new Exception($"Updating game {reviewId} failed on save!");
+            }
+
+            return NoContent();
+
+        }
+
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> PartiallyUpdateReview(int reviewId, int gameId,
+            [FromBody] JsonPatchDocument<ReviewForUpdateDto> patchDoc)
+        {
+            if (patchDoc == null)
+            {
+                return BadRequest();
+            }
+
+            if (!await _reviewRepository.ReviewExists(reviewId))
+            {
+                return NotFound();
+            }
+
+            var reviewForGameFromRepo = await _reviewRepository.GetReviewByGameId(gameId, reviewId);
+
+            if (reviewForGameFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            var reviewToPatch = Mapper.Map<ReviewForUpdateDto>(reviewForGameFromRepo);
+
+            patchDoc.ApplyTo(reviewToPatch);
+
+            Mapper.Map(reviewToPatch, reviewForGameFromRepo);
+
+            await _reviewRepository.UpdateReview(reviewForGameFromRepo);
+
+            if (!await _reviewRepository.Save())
+            {
+                throw new Exception($"Failed to update review {reviewId}, try again.");
             }
 
             return NoContent();
