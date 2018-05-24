@@ -11,6 +11,9 @@ using Microsoft.Extensions.Options;
 using GameReviewApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using GameReviewApi.Repositories;
+using NLog.Extensions.Logging;
+using Microsoft.AspNetCore.Diagnostics;
 
 namespace GameReviewApi
 {
@@ -26,12 +29,15 @@ namespace GameReviewApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ReviewContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddMvc();
+            services.AddDbContext<ReviewContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddScoped<IReviewRepository, ReviewRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, 
+             ILoggerFactory loggerFactory, ReviewContext reviewContext)
         {
             if (env.IsDevelopment())
             {
@@ -43,8 +49,17 @@ namespace GameReviewApi
                 {
                     appBuilder.Run(async context =>
                     {
+                        var exceptionHandlerFeature = context.Features.Get<IExceptionHandlerFeature>();
+                        if (exceptionHandlerFeature != null)
+                        {
+                            var logger = loggerFactory.CreateLogger("Global exception logger");
+                            logger.LogError(500, 
+                                exceptionHandlerFeature.Error,
+                                exceptionHandlerFeature.Error.Message);
+                        }
+
                         context.Response.StatusCode = 500;
-                        await context.Response.WriteAsync("A server error happened. Please try again later!");
+                        await context.Response.WriteAsync("A unexpected fault happened. Please try again later!");
                     });
                 });
             }
@@ -54,24 +69,25 @@ namespace GameReviewApi
             AutoMapper.Mapper.Initialize(cfg =>
             {
                 cfg.CreateMap<Entities.Review, Models.ReviewDto>()
-                .ForMember(dest => dest.Author, opt => opt.MapFrom(src =>
-                $"{src.Author}"))
                 .ForMember(dest => dest.DatePosted, opt => opt.MapFrom(src =>
-                src.DatePosted.ToString("dd/MM/yyyy")));
-
-                cfg.CreateMap<Entities.Game, Models.GameDto>()
-                .ForMember(dest => dest.ReleaseDate, opt => opt.MapFrom(src => src.ReleaseDate.ToShortDateString()));
-
-                cfg.CreateMap<Entities.Comment, Models.CommentDto>()
-                .ForMember(dest => dest.DatePosted, opt => opt.MapFrom(src => src.DatePosted.ToShortDateString()));
-
-                cfg.CreateMap<Entities.Game, Models.GameDto>();
+                src.DatePosted.ToShortDateString()));
 
                 cfg.CreateMap<Models.ReviewForCreationDto, Entities.Review>();
 
-                cfg.CreateMap<Models.ReviewForCreationDto, Entities.Game>();
+                cfg.CreateMap<Models.ReviewForUpdateDto, Entities.Review>();
+
+                cfg.CreateMap<Entities.Game, Models.GameDto>()
+                .ForMember(dest => dest.ReleaseDate, opt => opt.MapFrom(src => 
+                src.ReleaseDate.ToShortDateString()));
+
+                cfg.CreateMap<Models.GameForCreationDto, Entities.Game>();
 
                 cfg.CreateMap<Models.GameForUpdateDto, Entities.Game>();
+
+                cfg.CreateMap<Entities.Comment, Models.CommentDto>()
+                .ForMember(dest => dest.DatePosted, opt => opt.MapFrom(src => 
+                src.DatePosted.ToShortDateString()));
+
             });
 
             app.UseMvc();

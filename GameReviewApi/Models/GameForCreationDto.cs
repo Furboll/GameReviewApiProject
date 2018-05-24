@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GameReviewApi.Models
 {
-    public class GameForUpdateDto : GameForManipulationDto
+    public class GameForCreationDto : GameForManipulationDto
     {
 
     }
