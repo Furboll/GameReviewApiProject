@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GameReviewApi.Data;
 using GameReviewApi.Entities;
+using GameReviewApi.Helpers;
 
 namespace GameReviewApi.Repositories
 {
@@ -83,9 +84,47 @@ namespace GameReviewApi.Repositories
             return await _context.Games.ToListAsync();
         }
 
-        public async Task<IEnumerable<Review>> GetAllReviews()
+        public async Task<PagedList<Review>> GetAllReviews(ReviewResourceParameters reviewResourceParameters)
         {
-            return await _context.Reviews.ToListAsync();
+            var collectionBeforePaging = _context.Reviews
+                .OrderByDescending(r => r.DatePosted).AsQueryable();
+
+            if (!string.IsNullOrEmpty(reviewResourceParameters.ReviewTitle))
+            {
+                var reviewTitleForWhereClause = reviewResourceParameters.ReviewTitle.Trim().ToLowerInvariant();
+                collectionBeforePaging = collectionBeforePaging
+                    .Where(a => a.ReviewTitle.ToLowerInvariant() == reviewTitleForWhereClause);
+            }
+
+            if (!string.IsNullOrEmpty(reviewResourceParameters.GameTitle))
+            {
+                var gameTitleForWhereClause = reviewResourceParameters.GameTitle.Trim().ToLowerInvariant();
+                collectionBeforePaging = collectionBeforePaging
+                    .Where(a => a.Game.Title.ToLowerInvariant() == gameTitleForWhereClause);
+            }
+
+            if (!string.IsNullOrEmpty(reviewResourceParameters.SearchQuery))
+            {
+                var searchQueryFromWhereClause = reviewResourceParameters.SearchQuery.Trim().ToLowerInvariant();
+
+                collectionBeforePaging = collectionBeforePaging
+                    .Where(a => a.ReviewTitle.ToLowerInvariant().Contains(searchQueryFromWhereClause)
+                    || a.Author.ToLowerInvariant().Contains(searchQueryFromWhereClause)
+                    || a.Game.Title.ToLowerInvariant().Contains(searchQueryFromWhereClause)
+                    || a.Game.Publisher.ToLowerInvariant().Contains(searchQueryFromWhereClause)
+                    || a.Game.Developer.ToLowerInvariant().Contains(searchQueryFromWhereClause)
+                    || a.Game.Genre.ToLowerInvariant().Contains(searchQueryFromWhereClause));
+            }
+
+            return await PagedList<Review>.Create(collectionBeforePaging, 
+                reviewResourceParameters.PageNumber, 
+                reviewResourceParameters.PageSize);
+
+            //return await _context.Reviews
+            //    .OrderByDescending(r => r.DatePosted)
+            //    .Skip(reviewResourceParameters.PageSize * (reviewResourceParameters.PageNumber - 1))
+            //    .Take(reviewResourceParameters.PageSize)
+            //    .ToListAsync();
         }
 
         public async Task DeleteComment(Comment comment)
@@ -120,22 +159,22 @@ namespace GameReviewApi.Repositories
 
         public async Task UpdateReview(Review review)
         {
-            var itemToUpdate = await _context.Reviews.SingleOrDefaultAsync(r => r.Id == review.Id);
+            //var itemToUpdate = await _context.Reviews.SingleOrDefaultAsync(r => r.Id == review.Id);
 
-            if (itemToUpdate != null)
-            {
-                itemToUpdate.ReviewTitle = review.ReviewTitle;
-                itemToUpdate.Author = review.Author;
-                itemToUpdate.VideoUrl = review.VideoUrl;
-                itemToUpdate.Introduction = review.Introduction;
-                itemToUpdate.Body = review.Body;
-                itemToUpdate.Conclusion = review.Conclusion;
-                itemToUpdate.DatePosted = review.DatePosted;
+            //if (itemToUpdate != null)
+            //{
+            //    itemToUpdate.ReviewTitle = review.ReviewTitle;
+            //    itemToUpdate.Author = review.Author;
+            //    itemToUpdate.VideoUrl = review.VideoUrl;
+            //    itemToUpdate.Introduction = review.Introduction;
+            //    itemToUpdate.Body = review.Body;
+            //    itemToUpdate.Conclusion = review.Conclusion;
+            //    itemToUpdate.DatePosted = review.DatePosted;
 
-                //itemToUpdate.Game = review.Game;
-                //itemToUpdate.Comments = review.Comments;
-                //May or may not be needed
-            }
+            //    //itemToUpdate.Game = review.Game;
+            //    //itemToUpdate.Comments = review.Comments;
+            //    //May or may not be needed
+            //}
         }
 
         public async Task UpdateGame(Game game)

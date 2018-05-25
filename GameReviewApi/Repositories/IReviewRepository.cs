@@ -1,4 +1,5 @@
 ﻿using GameReviewApi.Entities;
+using GameReviewApi.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace GameReviewApi.Repositories
     public interface IReviewRepository
     {
         Task AddReview(Review review);
-        Task<IEnumerable<Review>> GetAllReviews();
+        Task<PagedList<Review>> GetAllReviews(ReviewResourceParameters reviewResourceParameters);
         Task<Review> GetReviewById(int reviewId);
         Task<Review> GetReviewByGameId(int gameId, int reviewId);
         Task DeleteReview(Review review);

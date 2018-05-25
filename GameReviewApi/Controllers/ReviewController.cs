@@ -9,6 +9,7 @@ using GameReviewApi.Models;
 using AutoMapper;
 using GameReviewApi.Entities;
 using Microsoft.AspNetCore.JsonPatch;
+using GameReviewApi.Helpers;
 
 namespace GameReviewApi.Controllers
 {
@@ -16,22 +17,80 @@ namespace GameReviewApi.Controllers
     [Route("api/reviews")]
     public class ReviewController : Controller
     {
-        public IReviewRepository _reviewRepository;
+        private IReviewRepository _reviewRepository;
+        private IUrlHelper _urlHelper;
 
-        public ReviewController(IReviewRepository reviewRepository)
+        public ReviewController(IReviewRepository reviewRepository, IUrlHelper urlHelper)
         {
             _reviewRepository = reviewRepository;
+            _urlHelper = urlHelper;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetReviews()
+        [HttpGet(Name = "GetReviews")]
+        public async Task<IActionResult> GetReviews(ReviewResourceParameters reviewResourceParameters)
         {
-            var reviewsFromDb = await _reviewRepository.GetAllReviews();
+            var reviewsFromDb = await _reviewRepository.GetAllReviews(reviewResourceParameters);
+
+            var previousPageLink = reviewsFromDb.HasPrevious ?
+                CreateReviewResourceUri(reviewResourceParameters,
+                ResourceUriType.PreviousPage) : null;
+
+            var nextPageLink = reviewsFromDb.HasNext ?
+                CreateReviewResourceUri(reviewResourceParameters,
+                ResourceUriType.NextPage) : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = reviewsFromDb.TotalCount,
+                pageSize = reviewsFromDb.PageSize,
+                currentPage = reviewsFromDb.CurrentPage,
+                totalPages = reviewsFromDb.TotalPages,
+                previousPageLink = previousPageLink,
+                nextPageLink = nextPageLink
+            };
+
+            Response.Headers.Add("X-Pagination",
+                Newtonsoft.Json.JsonConvert.SerializeObject(paginationMetadata));
 
             var reviews = Mapper.Map<IEnumerable<ReviewDto>>(reviewsFromDb);
-
-            //return new JsonResult(reviews);
             return Ok(reviews);
+        }
+
+        private string CreateReviewResourceUri(ReviewResourceParameters reviewResourceParameters, ResourceUriType type)
+        {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return _urlHelper.Link("GetReviews",
+                        new
+                        {
+                            searchQuery = reviewResourceParameters.SearchQuery,
+                            gameTitle = reviewResourceParameters.GameTitle,
+                            reviewTitle = reviewResourceParameters.ReviewTitle,
+                            pageNumber = reviewResourceParameters.PageNumber -1,
+                            pageSize = reviewResourceParameters.PageSize
+                        });
+                case ResourceUriType.NextPage:
+                    return _urlHelper.Link("GetReviews",
+                        new
+                        {
+                            searchQuery = reviewResourceParameters.SearchQuery,
+                            gameTitle = reviewResourceParameters.GameTitle,
+                            reviewTitle = reviewResourceParameters.ReviewTitle,
+                            pageNumber = reviewResourceParameters.PageNumber + 1,
+                            pageSize = reviewResourceParameters.PageSize
+                        });
+                    default:
+                    return _urlHelper.Link("GetReviews",
+                        new
+                        {
+                            searchQuery = reviewResourceParameters.SearchQuery,
+                            gameTitle = reviewResourceParameters.GameTitle,
+                            reviewTitle = reviewResourceParameters.ReviewTitle,
+                            pageNumber = reviewResourceParameters.PageNumber,
+                            pageSize = reviewResourceParameters.PageSize
+                        });
+            }
         }
 
         [HttpGet("{id}", Name ="GetReview")]
