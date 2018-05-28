@@ -6,16 +6,20 @@ using System.Threading.Tasks;
 using GameReviewApi.Data;
 using GameReviewApi.Entities;
 using GameReviewApi.Helpers;
+using GameReviewApi.Services;
+using GameReviewApi.Models;
 
 namespace GameReviewApi.Repositories
 {
     public class ReviewRepository : IReviewRepository
     {
-        ReviewContext _context;
+        private ReviewContext _context;
+        private IPropertyMappingService _propertyMappingService;
 
-        public ReviewRepository(ReviewContext context)
+        public ReviewRepository(ReviewContext context, IPropertyMappingService propertyMappingService)
         {
             _context = context;
+            _propertyMappingService = propertyMappingService;
         }
 
         public async Task AddReview(Review review)
@@ -86,8 +90,12 @@ namespace GameReviewApi.Repositories
 
         public async Task<PagedList<Review>> GetAllReviews(ReviewResourceParameters reviewResourceParameters)
         {
-            var collectionBeforePaging = _context.Reviews
-                .OrderByDescending(r => r.DatePosted).AsQueryable();
+            //var collectionBeforePaging = _context.Reviews
+            //    .OrderByDescending(r => r.DatePosted).AsQueryable();
+
+            var collectionBeforePaging = 
+                _context.Reviews.ApplySort(reviewResourceParameters.OrderBy, 
+                _propertyMappingService.GetPropertyMapping<ReviewDto,Review>());
 
             if (!string.IsNullOrEmpty(reviewResourceParameters.ReviewTitle))
             {
@@ -179,12 +187,12 @@ namespace GameReviewApi.Repositories
 
         public async Task UpdateGame(Game game)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public async Task UpdateComment(Comment comment)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public async Task<bool> ReviewExists(int reviewId)

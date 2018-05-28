@@ -10,6 +10,7 @@ using AutoMapper;
 using GameReviewApi.Entities;
 using Microsoft.AspNetCore.JsonPatch;
 using GameReviewApi.Helpers;
+using GameReviewApi.Services;
 
 namespace GameReviewApi.Controllers
 {
@@ -19,16 +20,31 @@ namespace GameReviewApi.Controllers
     {
         private IReviewRepository _reviewRepository;
         private IUrlHelper _urlHelper;
+        private IPropertyMappingService _propertyMappingService;
+        private ITypeHelperService _typeHelperService;
 
-        public ReviewController(IReviewRepository reviewRepository, IUrlHelper urlHelper)
+        public ReviewController(IReviewRepository reviewRepository, IUrlHelper urlHelper, IPropertyMappingService propertyMappingService, 
+            ITypeHelperService typeHelperService)
         {
             _reviewRepository = reviewRepository;
             _urlHelper = urlHelper;
+            _propertyMappingService = propertyMappingService;
+            _typeHelperService = typeHelperService;
         }
 
         [HttpGet(Name = "GetReviews")]
         public async Task<IActionResult> GetReviews(ReviewResourceParameters reviewResourceParameters)
         {
+            if (!_propertyMappingService.ValidMappingExistsFor<ReviewDto,Review>(reviewResourceParameters.OrderBy))
+            {
+                return BadRequest();
+            }
+
+            if (!_typeHelperService.TypeHasProperties<ReviewDto>(reviewResourceParameters.Fields))
+            {
+                return BadRequest();
+            }
+
             var reviewsFromDb = await _reviewRepository.GetAllReviews(reviewResourceParameters);
 
             var previousPageLink = reviewsFromDb.HasPrevious ?
@@ -53,7 +69,8 @@ namespace GameReviewApi.Controllers
                 Newtonsoft.Json.JsonConvert.SerializeObject(paginationMetadata));
 
             var reviews = Mapper.Map<IEnumerable<ReviewDto>>(reviewsFromDb);
-            return Ok(reviews);
+            //return Ok(reviews);
+            return Ok(reviews.ShapeData(reviewResourceParameters.Fields));
         }
 
         private string CreateReviewResourceUri(ReviewResourceParameters reviewResourceParameters, ResourceUriType type)
@@ -64,6 +81,8 @@ namespace GameReviewApi.Controllers
                     return _urlHelper.Link("GetReviews",
                         new
                         {
+                            fields = reviewResourceParameters.Fields,
+                            orderBy = reviewResourceParameters.OrderBy,
                             searchQuery = reviewResourceParameters.SearchQuery,
                             gameTitle = reviewResourceParameters.GameTitle,
                             reviewTitle = reviewResourceParameters.ReviewTitle,
@@ -74,6 +93,8 @@ namespace GameReviewApi.Controllers
                     return _urlHelper.Link("GetReviews",
                         new
                         {
+                            fields = reviewResourceParameters.Fields,
+                            orderBy = reviewResourceParameters.OrderBy,
                             searchQuery = reviewResourceParameters.SearchQuery,
                             gameTitle = reviewResourceParameters.GameTitle,
                             reviewTitle = reviewResourceParameters.ReviewTitle,
@@ -84,6 +105,8 @@ namespace GameReviewApi.Controllers
                     return _urlHelper.Link("GetReviews",
                         new
                         {
+                            fields = reviewResourceParameters.Fields,
+                            orderBy = reviewResourceParameters.OrderBy,
                             searchQuery = reviewResourceParameters.SearchQuery,
                             gameTitle = reviewResourceParameters.GameTitle,
                             reviewTitle = reviewResourceParameters.ReviewTitle,
@@ -94,17 +117,21 @@ namespace GameReviewApi.Controllers
         }
 
         [HttpGet("{id}", Name ="GetReview")]
-        public async Task<IActionResult> GetReview(int id)
+        public async Task<IActionResult> GetReview(int id,[FromQuery] string fields)
         {
+            if (!_typeHelperService.TypeHasProperties<ReviewDto>(fields))
+            {
+                return BadRequest();
+            }
             var reviewFromDb = await _reviewRepository.GetReviewById(id);
 
             if (reviewFromDb == null)
             {
                 return NotFound();
             }
-
+            
             var reviewDTO = Mapper.Map<ReviewDto>(reviewFromDb);
-            return Ok(reviewDTO);
+            return Ok(reviewDTO.ShapeData(fields));
 
             //return Ok(reviewFromDb); //replace this with above code
         }

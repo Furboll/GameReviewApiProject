@@ -30,5 +30,9 @@ namespace GameReviewApi.Helpers
         public string GameTitle { get; set; }
 
         public string SearchQuery { get; set; }
+
+        public string OrderBy { get; set; } = "ReviewTitle";
+
+        public string Fields { get; set; }
     }
 }
