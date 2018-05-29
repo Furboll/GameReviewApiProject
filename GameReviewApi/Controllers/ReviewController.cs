@@ -33,7 +33,7 @@ namespace GameReviewApi.Controllers
         }
 
         [HttpGet(Name = "GetReviews")]
-        public async Task<IActionResult> GetReviews(ReviewResourceParameters reviewResourceParameters)
+        public async Task<IActionResult> GetReviews(ReviewResourceParameters reviewResourceParameters, [FromHeader(Name ="Accept")] string mediaType)
         {
             if (!_propertyMappingService.ValidMappingExistsFor<ReviewDto,Review>(reviewResourceParameters.OrderBy))
             {
@@ -47,30 +47,70 @@ namespace GameReviewApi.Controllers
 
             var reviewsFromDb = await _reviewRepository.GetAllReviews(reviewResourceParameters);
 
-            var previousPageLink = reviewsFromDb.HasPrevious ?
-                CreateReviewResourceUri(reviewResourceParameters,
-                ResourceUriType.PreviousPage) : null;
-
-            var nextPageLink = reviewsFromDb.HasNext ?
-                CreateReviewResourceUri(reviewResourceParameters,
-                ResourceUriType.NextPage) : null;
-
-            var paginationMetadata = new
-            {
-                totalCount = reviewsFromDb.TotalCount,
-                pageSize = reviewsFromDb.PageSize,
-                currentPage = reviewsFromDb.CurrentPage,
-                totalPages = reviewsFromDb.TotalPages,
-                previousPageLink = previousPageLink,
-                nextPageLink = nextPageLink
-            };
-
-            Response.Headers.Add("X-Pagination",
-                Newtonsoft.Json.JsonConvert.SerializeObject(paginationMetadata));
-
             var reviews = Mapper.Map<IEnumerable<ReviewDto>>(reviewsFromDb);
+
+            if (mediaType == "application/vnd.gamextime.hateoas+json")
+            {
+                var paginationMetadata = new
+                {
+                    totalCount = reviewsFromDb.TotalCount,
+                    pageSize = reviewsFromDb.PageSize,
+                    currentPage = reviewsFromDb.CurrentPage,
+                    totalPages = reviewsFromDb.TotalPages,
+                };
+
+                Response.Headers.Add("X-Pagination",
+                    Newtonsoft.Json.JsonConvert.SerializeObject(paginationMetadata));
+
+                var links = CreateLinksForReviews(reviewResourceParameters, reviewsFromDb.HasNext, reviewsFromDb.HasPrevious);
+
+                var shapedReviews = reviews.ShapeData(reviewResourceParameters.Fields);
+
+                var shapedReviewsWithLinks = shapedReviews.Select(review =>
+                {
+                    var reviewAsDictionary = review as IDictionary<string, object>;
+                    var reviewLinks = CreateLinksForReview((int)reviewAsDictionary["Id"], reviewResourceParameters.Fields);
+
+                    reviewAsDictionary.Add("links", reviewLinks);
+
+                    return reviewAsDictionary;
+                });
+
+                var linkedCollectionResource = new
+                {
+                    value = shapedReviewsWithLinks,
+                    links = links
+                };
+
+                return Ok(linkedCollectionResource);
+            }
+            else
+            {
+                var previousPageLink = reviewsFromDb.HasPrevious ?
+                    CreateReviewResourceUri(reviewResourceParameters,
+                    ResourceUriType.PreviousPage) : null;
+
+                var nextPageLink = reviewsFromDb.HasNext ?
+                    CreateReviewResourceUri(reviewResourceParameters,
+                    ResourceUriType.NextPage) : null;
+
+                var paginationMetadata = new
+                {
+                    previousPageLink = previousPageLink,
+                    nextPageLink = nextPageLink,
+                    totalCount = reviewsFromDb.TotalCount,
+                    pageSize = reviewsFromDb.PageSize,
+                    currentPage = reviewsFromDb.CurrentPage,
+                    totalPages = reviewsFromDb.TotalPages
+                };
+
+                Response.Headers.Add("X-Pagination",
+                    Newtonsoft.Json.JsonConvert.SerializeObject(paginationMetadata));
+
+                return Ok(reviews.ShapeData(reviewResourceParameters.Fields));
+            }
             //return Ok(reviews);
-            return Ok(reviews.ShapeData(reviewResourceParameters.Fields));
+            //return Ok(reviews.ShapeData(reviewResourceParameters.Fields));
         }
 
         private string CreateReviewResourceUri(ReviewResourceParameters reviewResourceParameters, ResourceUriType type)
@@ -101,6 +141,7 @@ namespace GameReviewApi.Controllers
                             pageNumber = reviewResourceParameters.PageNumber + 1,
                             pageSize = reviewResourceParameters.PageSize
                         });
+                case ResourceUriType.Current:
                     default:
                     return _urlHelper.Link("GetReviews",
                         new
@@ -117,7 +158,7 @@ namespace GameReviewApi.Controllers
         }
 
         [HttpGet("{id}", Name ="GetReview")]
-        public async Task<IActionResult> GetReview(int id,[FromQuery] string fields)
+        public async Task<IActionResult> GetReview(int id,[FromQuery] string fields, [FromHeader(Name = "Accept")] string mediaType)
         {
             if (!_typeHelperService.TypeHasProperties<ReviewDto>(fields))
             {
@@ -130,14 +171,36 @@ namespace GameReviewApi.Controllers
                 return NotFound();
             }
             
-            var reviewDTO = Mapper.Map<ReviewDto>(reviewFromDb);
-            return Ok(reviewDTO.ShapeData(fields));
+            var review = Mapper.Map<ReviewDto>(reviewFromDb);
 
+            if (mediaType == "application/vnd.gamextime.hateoas+json")
+            {
+                var links = CreateLinksForReview(id, fields);
+
+                var linkedResourceToReturn = review.ShapeData(fields)
+                    as IDictionary<string, object>;
+
+                linkedResourceToReturn.Add("links", links);
+
+                return Ok(linkedResourceToReturn);
+            }
+            else
+            {
+                return Ok(review.ShapeData(fields));
+            }
+
+            //var links = CreateLinksForReview(id, fields);
+            //var linkedResourceToReturn = review.ShapeData(fields)
+            //    as IDictionary<string, object>;
+            //linkedResourceToReturn.Add("links", links);
+            //return Ok(linkedResourceToReturn);
+
+            //return Ok(review.ShapeData(fields));
             //return Ok(reviewFromDb); //replace this with above code
         }
 
-        [HttpPost]
-        public async Task<IActionResult> CreateReview([FromBody] ReviewForCreationDto review)
+        [HttpPost(Name = "CreateReview")]
+        public async Task<IActionResult> CreateReview([FromBody] ReviewForCreationDto review, [FromHeader(Name = "Accept")] string mediaType)
         {
             if (review == null)
             {
@@ -155,12 +218,35 @@ namespace GameReviewApi.Controllers
 
             var reviewToReturn = Mapper.Map<ReviewDto>(reviewEntity);
 
-            return CreatedAtRoute("GetReview",
-                new { id = reviewToReturn.Id }, reviewToReturn);
+            if (mediaType == "application/vnd.gamextime.hateoas+json")
+            {
+                var links = CreateLinksForReview(reviewToReturn.Id, null);
+
+                var linkedResourceToReturn = reviewToReturn.ShapeData(null)
+                    as IDictionary<string, object>;
+
+                linkedResourceToReturn.Add("links", links);
+
+                return CreatedAtRoute("GetReview",
+                    new { id = linkedResourceToReturn["Id"] }, linkedResourceToReturn);
+            }
+            else
+            {
+                return CreatedAtRoute("GetReview",
+                    new { id = reviewToReturn.Id},
+                    reviewToReturn);
+            }
+
+            //var links = CreateLinksForReview(reviewToReturn.Id, null);
+            //var linkedResourceToReturn = reviewToReturn.ShapeData(null)
+            //    as IDictionary<string, object>;
+            //linkedResourceToReturn.Add("links", links);
+            //return CreatedAtRoute("GetReview",
+            //    new { id = linkedResourceToReturn["Id"] }, linkedResourceToReturn);
 
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}", Name = "DeleteReview")]
         public async Task<IActionResult> DeleteReview(int id)
         {
             var reviewFromRepo = await _reviewRepository.GetReviewById(id);
@@ -180,7 +266,7 @@ namespace GameReviewApi.Controllers
             return NoContent();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdateReview")]
         public async Task<IActionResult> UpdateReview(int reviewId, [FromBody] ReviewForUpdateDto review)
         {
             if (review == null)
@@ -212,7 +298,7 @@ namespace GameReviewApi.Controllers
 
         }
 
-        [HttpPatch("{id}")]
+        [HttpPatch("{id}", Name = "PartiallyUpdateReview")]
         public async Task<IActionResult> PartiallyUpdateReview(int reviewId, int gameId,
             [FromBody] JsonPatchDocument<ReviewForUpdateDto> patchDoc)
         {
@@ -247,6 +333,71 @@ namespace GameReviewApi.Controllers
             }
 
             return NoContent();
+        }
+
+        private IEnumerable<LinkDto> CreateLinksForReview(int id, string fields)
+        {
+            var links = new List<LinkDto>();
+
+            if (string.IsNullOrWhiteSpace(fields))
+            {
+                links.Add(
+                    new LinkDto(_urlHelper.Link("GetReview", new { id = id }),
+                    "self",
+                    "GET"));
+            }
+            else
+            {
+                links.Add(
+                    new LinkDto(_urlHelper.Link("GetReview", new { id = id, fields = fields }),
+                    "self",
+                    "GET"));
+            }
+
+            links.Add(
+                new LinkDto(_urlHelper.Link("DeleteReview", new { id = id }),
+                "delete_review",
+                "DELETE"));
+
+            links.Add(
+                new LinkDto(_urlHelper.Link("CreateGameForReview", new { reviewId = id }),
+                "create_game_for_review",
+                "POST"));
+
+            links.Add(
+                new LinkDto(_urlHelper.Link("GetReviewForGame", new { reviewId = id }),
+                "game_review",
+                "GET"));
+
+            return links;
+        }
+
+        private IEnumerable<LinkDto> CreateLinksForReviews(ReviewResourceParameters reviewResourceParameters,
+            bool hasNext, bool hasPrevious)
+        {
+            var links = new List<LinkDto>();
+
+            links.Add(
+                new LinkDto(CreateReviewResourceUri(reviewResourceParameters, ResourceUriType.Current),
+                "self", "GET"));
+
+            if (hasNext)
+            {
+                links.Add(
+                    new LinkDto(CreateReviewResourceUri(reviewResourceParameters,
+                    ResourceUriType.NextPage),
+                    "nextPage", "GET"));
+            }
+
+            if (hasPrevious)
+            {
+                links.Add(
+                    new LinkDto(CreateReviewResourceUri(reviewResourceParameters,
+                    ResourceUriType.PreviousPage),
+                    "previousPage", "GET"));
+            }
+
+            return links;
         }
     }
 }

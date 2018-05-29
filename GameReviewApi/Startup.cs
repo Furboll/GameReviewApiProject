@@ -19,6 +19,8 @@ using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using GameReviewApi.Services;
 using Newtonsoft.Json.Serialization;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Marvin.Cache.Headers;
 
 namespace GameReviewApi
 {
@@ -34,12 +36,20 @@ namespace GameReviewApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc()
-                .AddJsonOptions(options =>
+            services.AddMvc(setupAction => 
+            {
+                var jsonOutputFormatter = setupAction.OutputFormatters.OfType<JsonOutputFormatter>().FirstOrDefault();
+
+                if (jsonOutputFormatter != null)
                 {
-                    options.SerializerSettings.ContractResolver =
-                    new CamelCasePropertyNamesContractResolver();
-                });
+                    jsonOutputFormatter.SupportedMediaTypes.Add("application/vnd.gamesxtime.hateoas+json");
+                }
+            })
+            .AddJsonOptions(options =>
+            {
+                options.SerializerSettings.ContractResolver =
+                new CamelCasePropertyNamesContractResolver();
+            });
 
             services.AddDbContext<ReviewContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
@@ -56,6 +66,20 @@ namespace GameReviewApi
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
 
             services.AddTransient<ITypeHelperService, TypeHelperService>();
+
+            services.AddHttpCacheHeaders(
+                (expirationModelOptions)
+                =>
+                {
+                    expirationModelOptions.MaxAge = 600;
+                },
+                (validationModelOptions)
+                =>
+                {
+                    validationModelOptions.AddMustRevalidate = true;
+                });
+
+            services.AddResponseCaching();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -112,6 +136,10 @@ namespace GameReviewApi
                 src.DatePosted.ToShortDateString()));
 
             });
+
+            app.UseResponseCaching();
+
+            app.UseHttpCacheHeaders();
 
             app.UseMvc();
         }

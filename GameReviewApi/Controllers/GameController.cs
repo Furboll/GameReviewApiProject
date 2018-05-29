@@ -20,14 +20,16 @@ namespace GameReviewApi.Controllers
     {
         private IReviewRepository _reviewRepository;
         private ILogger<GameController> _logger;
+        private IUrlHelper _urlHelper;
 
-        public GameController(IReviewRepository reviewRepository, ILogger<GameController> logger)
+        public GameController(IReviewRepository reviewRepository, ILogger<GameController> logger, IUrlHelper urlHelper)
         {
             _reviewRepository = reviewRepository;
             _logger = logger;
+            _urlHelper = urlHelper;
         }
 
-        [HttpGet()]
+        [HttpGet(Name = "GetReviewedGames")]
         public async Task<IActionResult> GetReviewedGames(int reviewId, int gameId)
         {
             if (!await _reviewRepository.ReviewExists(reviewId))
@@ -39,7 +41,15 @@ namespace GameReviewApi.Controllers
 
             var gameForReview = Mapper.Map<IEnumerable<GameDto>>(gameForReviewFromDb);
 
-            return Ok(gameForReview);
+            gameForReview = gameForReview.Select(game =>
+            {
+                game = CreateLinksForGame(game);
+                return game;
+            });
+
+            var wrapper = new LinkedCollectionResourceWrapperDto<GameDto>(gameForReview);
+
+            return Ok(CreateLinksForGames(wrapper));
         }
 
         [HttpGet("{id}", Name = "GetReviewForGame")]
@@ -57,11 +67,10 @@ namespace GameReviewApi.Controllers
             }
 
             var reviewForGame = Mapper.Map<GameDto>(gameReviewFromRepo); //<-- needs to change most prob... cept I forgot to what X_X
-
-            return Ok(reviewForGame);
+            return Ok(CreateLinksForGame(reviewForGame));
         }
 
-        [HttpPost()]
+        [HttpPost(Name = "CreateGameForReview")]
         public async Task<IActionResult> CreateGameForReview(int reviewId, [FromBody] GameForCreationDto game)
         {
             if (game == null)
@@ -71,7 +80,7 @@ namespace GameReviewApi.Controllers
 
             if (game.Developer == game.Title && game.Publisher == game.Title)
             {
-                ModelState.AddModelError(nameof(GameForCreationDto),"The title should not have developer or publisher in it");
+                ModelState.AddModelError(nameof(GameForCreationDto), "The title should not have developer or publisher in it");
             }
 
             if (!ModelState.IsValid)
@@ -96,10 +105,10 @@ namespace GameReviewApi.Controllers
             var gameToReturn = Mapper.Map<GameDto>(gameEntity);
 
             return CreatedAtRoute("GeReviewtGame",
-                new { id = gameToReturn.Id }, gameToReturn);
+                new { id = gameToReturn.Id }, CreateLinksForGame(gameToReturn));
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = "DeleteGame")]
         public async Task<IActionResult> DeleteGame(int reviewId, int gameId)
         {
             if (!await _reviewRepository.ReviewExists(reviewId))
@@ -126,7 +135,7 @@ namespace GameReviewApi.Controllers
             return NoContent();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "UpdateGame")]
         public async Task<IActionResult> UpdateGame(int gameId, [FromBody] GameForUpdateDto game)
         {
             if (game == null)
@@ -168,8 +177,8 @@ namespace GameReviewApi.Controllers
 
         }
 
-        [HttpPatch("{id}")]
-        public async Task<IActionResult> PartiallyUpdateGame(int reviewId, int gameId, 
+        [HttpPatch("{id}", Name = "PartiallyUpdateGame")]
+        public async Task<IActionResult> PartiallyUpdateGame(int reviewId, int gameId,
             [FromBody] JsonPatchDocument<GameForUpdateDto> patchDoc)
         {
             if (patchDoc == null)
@@ -217,5 +226,42 @@ namespace GameReviewApi.Controllers
             return NoContent();
         }
 
+        private GameDto CreateLinksForGame(GameDto game)
+        {
+            game.Links.Add(new LinkDto(_urlHelper.Link("GetGameForReview",
+                new { id = game.Id }),
+                "self",
+                "GET"));
+
+            game.Links.Add(
+                new LinkDto(_urlHelper.Link("DeleteGame",
+                new { id = game.Id }),
+                "delete_game",
+                "DELETE"));
+
+            game.Links.Add(
+                new LinkDto(_urlHelper.Link("UpdateGame",
+                new { id = game.Id }),
+                "update_game",
+                "PUT"));
+
+            game.Links.Add(
+                new LinkDto(_urlHelper.Link("PartiallyUpdateGame",
+                new { id = game.Id }),
+                "partially_update_game",
+                "PATCH"));
+
+            return game;
+        }
+
+        private LinkedCollectionResourceWrapperDto<GameDto> CreateLinksForGames(LinkedCollectionResourceWrapperDto<GameDto> gameWrapper)
+        {
+            gameWrapper.Links.Add(
+                new LinkDto(_urlHelper.Link("GetReviewdGames", new { }),
+                "self",
+                "GET"));
+
+            return gameWrapper;
+        }
     }
 }

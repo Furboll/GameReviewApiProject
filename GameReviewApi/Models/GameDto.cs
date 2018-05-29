@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace GameReviewApi.Models
 {
-    public class GameDto
+    public class GameDto : LinkedResourceBaseDto
     {
         public int Id { get; set; }
 
