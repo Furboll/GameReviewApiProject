@@ -124,7 +124,7 @@ namespace GameReviewApi
                 cfg.CreateMap<Models.ReviewForUpdateDto, Entities.Review>();
 
                 cfg.CreateMap<Entities.Game, Models.GameDto>()
-                .ForMember(dest => dest.ReleaseDate, opt => opt.MapFrom(src => 
+                .ForMember(dest => dest.ReleaseDate, opt => opt.MapFrom(src =>
                 src.ReleaseDate.ToShortDateString()));
 
                 cfg.CreateMap<Models.GameForCreationDto, Entities.Game>();
@@ -132,10 +132,12 @@ namespace GameReviewApi
                 cfg.CreateMap<Models.GameForUpdateDto, Entities.Game>();
 
                 cfg.CreateMap<Entities.Comment, Models.CommentDto>()
-                .ForMember(dest => dest.DatePosted, opt => opt.MapFrom(src => 
+                .ForMember(dest => dest.DatePosted, opt => opt.MapFrom(src =>
                 src.DatePosted.ToShortDateString()));
 
             });
+
+            reviewContext.EnsureSeedDataForContext();
 
             app.UseResponseCaching();
 

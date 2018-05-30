@@ -16,6 +16,8 @@ namespace GameReviewApi
         public static void Main(string[] args)
         {
             BuildWebHost(args).Run();
+
+            //reviewContext.EnsureSeedDataForContext();
         }
 
         public static IWebHost BuildWebHost(string[] args) =>

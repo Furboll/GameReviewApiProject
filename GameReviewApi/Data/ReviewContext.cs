@@ -9,8 +9,10 @@ namespace GameReviewApi.Data
 {
     public class ReviewContext : DbContext
     {
-        public ReviewContext(DbContextOptions<ReviewContext> options) : base (options)
-        { }
+        public ReviewContext(DbContextOptions<ReviewContext> options) : base(options)
+        {
+            Database.Migrate();
+        }
 
         public DbSet<Game> Games { get; set; }
         public DbSet<Review> Reviews { get; set; }
