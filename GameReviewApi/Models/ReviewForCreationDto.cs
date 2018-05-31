@@ -8,7 +8,8 @@ namespace GameReviewApi.Models
 {
     public class ReviewForCreationDto
     {
-        //public string Name { get; set; } <-- not sure if needed
+        public string ReviewTitle { get; set; }
+
         public string Author { get; set; }
 
         public string VideoUrl { get; set; }
@@ -22,6 +23,6 @@ namespace GameReviewApi.Models
         public DateTime DatePosted { get; set; }
 
         public Game Game { get; set; }
-        public List<Comment> Comments { get; set; }
+        //public List<Comment> Comments { get; set; }
     }
 }

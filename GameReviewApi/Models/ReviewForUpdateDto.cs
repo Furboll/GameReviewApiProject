@@ -7,6 +7,8 @@ namespace GameReviewApi.Models
 {
     public class ReviewForUpdateDto
     {
+        public string ReviewTitle { get; set; }
+
         public string Author { get; set; }
 
         public string VideoUrl { get; set; }

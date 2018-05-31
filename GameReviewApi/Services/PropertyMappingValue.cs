@@ -7,13 +7,13 @@ namespace GameReviewApi.Services
 {
     public class PropertyMappingValue
     {
-        public IEnumerable<string> DesinationProperties { get; private set; }
+        public IEnumerable<string> DestinationProperties { get; private set; }
 
         public bool Revert { get; set; }
 
         public PropertyMappingValue(IEnumerable<string> destinationProperties, bool revert = false)
         {
-            DesinationProperties = destinationProperties;
+            DestinationProperties = destinationProperties;
             Revert = revert;
         }
     }

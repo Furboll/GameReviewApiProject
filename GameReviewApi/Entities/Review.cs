@@ -34,6 +34,7 @@ namespace GameReviewApi.Entities
         public DateTime DatePosted { get; set; }
 
         public Game Game { get; set; }
-        public List<Comment> Comments { get; set; }
+        public ICollection<Comment> Comments { get; set; }
+            = new List<Comment>();
     }
 }

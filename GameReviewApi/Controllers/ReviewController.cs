@@ -164,6 +164,7 @@ namespace GameReviewApi.Controllers
             {
                 return BadRequest();
             }
+
             var reviewFromDb = await _reviewRepository.GetReviewById(id);
 
             if (reviewFromDb == null)

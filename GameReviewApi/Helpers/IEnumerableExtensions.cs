@@ -9,7 +9,9 @@ namespace GameReviewApi.Helpers
 {
     public static class IEnumerableExtensions
     {
-        public static IEnumerable<ExpandoObject> ShapeData<TSource>(this IEnumerable<TSource> source, string fields)
+        public static IEnumerable<ExpandoObject> ShapeData<TSource>(
+            this IEnumerable<TSource> source, 
+            string fields)
         {
             if (source == null)
             {
@@ -34,7 +36,8 @@ namespace GameReviewApi.Helpers
                 {
                     var propertyName = field.Trim();
 
-                    var propertyInfo = typeof(TSource).GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+                    var propertyInfo = typeof(TSource)
+                        .GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
 
                     if (propertyInfo == null)
                     {

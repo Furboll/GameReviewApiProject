@@ -25,6 +25,6 @@ namespace GameReviewApi.Models
         public string Developer { get; set; }
 
         [Required(ErrorMessage = "You should fill out a release date")]
-        public string ReleaseDate { get; set; }
+        public DateTime ReleaseDate { get; set; }
     }
 }

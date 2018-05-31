@@ -1,4 +1,5 @@
 ﻿using GameReviewApi.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,8 +11,14 @@ namespace GameReviewApi.Data
     {
         public static void EnsureSeedDataForContext(this ReviewContext context)
         {
+            //context.Database.EnsureCreated();
             context.Reviews.RemoveRange(context.Reviews);
             context.SaveChanges();
+
+            //if (context.Reviews.Any())
+            //{
+            //    return;
+            //}
 
             var reviews = new List<Review>()
             {
@@ -38,7 +45,7 @@ namespace GameReviewApi.Data
                     {
                         new Comment()
                         {
-                            CommentId = 1,
+                            Id = 1,
                             Author = "Schmuck",
                             CommentContent = "I are Schmuck, this review Schmuck",
                             DatePosted = new DateTime(2018, 1, 2),
@@ -68,7 +75,7 @@ namespace GameReviewApi.Data
                     {
                         new Comment()
                         {
-                            CommentId = 2,
+                            Id = 2,
                             Author = "Schmuckie",
                             CommentContent = "I are Schmuckie, this review Schmuckie",
                             DatePosted = new DateTime(2018, 2, 2),
@@ -98,7 +105,7 @@ namespace GameReviewApi.Data
                     {
                         new Comment()
                         {
-                            CommentId = 3,
+                            Id = 3,
                             Author = "Schmucke",
                             CommentContent = "I are Schmucke, this review Schmucke",
                             DatePosted = new DateTime(2018, 3, 2),
@@ -128,7 +135,7 @@ namespace GameReviewApi.Data
                     {
                         new Comment()
                         {
-                            CommentId = 4,
+                            Id = 4,
                             Author = "Schmucko",
                             CommentContent = "I are Schmucko, this review Schmucko",
                             DatePosted = new DateTime(2018, 4, 2),
@@ -158,7 +165,7 @@ namespace GameReviewApi.Data
                     {
                         new Comment()
                         {
-                            CommentId = 6,
+                            Id = 5,
                             Author = "Schmucka",
                             CommentContent = "I are Schmucka, this review Schmucka",
                             DatePosted = new DateTime(2018, 5, 2),
@@ -188,7 +195,7 @@ namespace GameReviewApi.Data
                     {
                         new Comment()
                         {
-                            CommentId = 6,
+                            Id = 6,
                             Author = "Schmucku",
                             CommentContent = "I are Schmucku, this review Schmucku",
                             DatePosted = new DateTime(2018, 6, 2),
@@ -218,7 +225,7 @@ namespace GameReviewApi.Data
                     {
                         new Comment()
                         {
-                            CommentId = 7,
+                            Id = 7,
                             Author = "Schmucky",
                             CommentContent = "I are Schmucky, this review Schmucky",
                             DatePosted = new DateTime(2018, 7, 2),
@@ -248,7 +255,7 @@ namespace GameReviewApi.Data
                     {
                         new Comment()
                         {
-                            CommentId = 8,
+                            Id = 8,
                             Author = "Schmuckou",
                             CommentContent = "I are Schmuckou, this review Schmuckou",
                             DatePosted = new DateTime(2018, 8, 2),
@@ -278,7 +285,7 @@ namespace GameReviewApi.Data
                     {
                         new Comment()
                         {
-                            CommentId = 9,
+                            Id = 9,
                             Author = "Schmuckoo",
                             CommentContent = "I are Schmuckoo, this review Schmuckoo",
                             DatePosted = new DateTime(2018, 9, 2),
@@ -297,7 +304,7 @@ namespace GameReviewApi.Data
                     DatePosted = new DateTime(2018, 10, 1),
                     Game = new Game()
                     {
-                        Id = 10,
+                        //Id = 10,
                         Title = "Super Mario 64",
                         Genre = "Action-adventure",
                         Publisher = "Nintendo",
@@ -308,7 +315,7 @@ namespace GameReviewApi.Data
                     {
                         new Comment()
                         {
-                            CommentId = 10,
+                            Id = 10,
                             Author = "Schmuckae",
                             CommentContent = "I are Schmuckae, this review Schmuckae",
                             DatePosted = new DateTime(2018, 10, 2),
@@ -317,8 +324,25 @@ namespace GameReviewApi.Data
                 }
             };
 
+
             context.Reviews.AddRange(reviews);
-            context.SaveChanges();
+            context.Database.OpenConnection();
+            try
+            {
+                context.Database.ExecuteSqlCommand("SET IDENTITY_INSERT dbo.Games ON");
+                context.Database.ExecuteSqlCommand("SET IDENTITY_INSERT dbo.Comments ON");
+                context.Database.ExecuteSqlCommand("SET IDENTITY_INSERT dbo.Reviews ON");
+                context.SaveChanges();
+                context.Database.ExecuteSqlCommand("SET IDENTITY_INSERT dbo.Games OFF");
+                context.Database.ExecuteSqlCommand("SET IDENTITY_INSERT dbo.Comments OFF");
+                context.Database.ExecuteSqlCommand("SET IDENTITY_INSERT dbo.Reviews OFF");
+            }
+            finally
+            {
+                context.Database.CloseConnection();
+            }
+            //context.Reviews.AddRange(reviews);
+            //context.SaveChanges();
         }
     }
 }

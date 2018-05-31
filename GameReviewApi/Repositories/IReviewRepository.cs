@@ -11,6 +11,7 @@ namespace GameReviewApi.Repositories
     {
         Task AddReview(Review review);
         Task<PagedList<Review>> GetAllReviews(ReviewResourceParameters reviewResourceParameters);
+        Task<IEnumerable<Review>> GetAllReviews(IEnumerable<int> reviewIds);
         Task<Review> GetReviewById(int reviewId);
         Task<Review> GetReviewByGameId(int gameId, int reviewId);
         Task DeleteReview(Review review);

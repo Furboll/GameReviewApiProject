@@ -43,14 +43,14 @@ namespace GameReviewApi.Repositories
         public async Task<Comment> GetCommentById(int Id)
         {
             return await _context.Comments
-                .Where(c => c.CommentId == Id)
+                .Where(c => c.Id == Id)
                 .SingleOrDefaultAsync();
         }
 
         public async Task<Comment> GetCommentsByReviewId(int reviewId, int commentID)
         {
             return await _context.Comments
-                .Where(c => c.ReviewId == reviewId && c.CommentId == commentID)
+                .Where(c => c.ReviewId == reviewId && c.Id == commentID)
                 .FirstOrDefaultAsync();
         }
 
@@ -93,7 +93,7 @@ namespace GameReviewApi.Repositories
             //var collectionBeforePaging = _context.Reviews
             //    .OrderByDescending(r => r.DatePosted).AsQueryable();
 
-            var collectionBeforePaging = 
+            var collectionBeforePaging =
                 _context.Reviews.ApplySort(reviewResourceParameters.OrderBy, 
                 _propertyMappingService.GetPropertyMapping<ReviewDto,Review>());
 
@@ -135,9 +135,17 @@ namespace GameReviewApi.Repositories
             //    .ToListAsync();
         }
 
+        public async Task<IEnumerable<Review>> GetAllReviews(IEnumerable<int> reviewIds)
+        {
+            return await _context.Reviews.Where(a => reviewIds.Contains(a.Id))
+                .OrderBy(a => a.Author)
+                .OrderBy(a => a.ReviewTitle)
+                .ToListAsync();
+        }
+
         public async Task DeleteComment(Comment comment)
         {
-            var itemToRemove = await _context.Comments.SingleOrDefaultAsync(c => c.CommentId == comment.CommentId);
+            var itemToRemove = await _context.Comments.SingleOrDefaultAsync(c => c.Id == comment.Id);
             if (itemToRemove != null)
             {
                 _context.Comments.Remove(itemToRemove);

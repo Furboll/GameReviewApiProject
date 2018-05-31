@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 namespace GameReviewApi.Controllers
 {
     [Route("api")]
-    public class RouteController : Controller
+    public class RootController : Controller
     {
         private IUrlHelper _urlHelper;
 
-        public RouteController(IUrlHelper urlHelper)
+        public RootController(IUrlHelper urlHelper)
         {
             _urlHelper = urlHelper;
         }

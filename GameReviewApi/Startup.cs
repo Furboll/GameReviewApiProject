@@ -36,6 +36,8 @@ namespace GameReviewApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //services.AddDbContext<ReviewContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
             services.AddMvc(setupAction => 
             {
                 var jsonOutputFormatter = setupAction.OutputFormatters.OfType<JsonOutputFormatter>().FirstOrDefault();
@@ -112,6 +114,9 @@ namespace GameReviewApi
             }
 
             //Add a seed menthod for data
+
+            //reviewContext.EnsureSeedDataForContext();
+            //ReviewContextExtensions.EnsureSeedDataForContext(reviewContext);
 
             AutoMapper.Mapper.Initialize(cfg =>
             {

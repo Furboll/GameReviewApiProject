@@ -99,13 +99,13 @@ namespace GameReviewApi.Controllers
 
             if (!await _reviewRepository.Save())
             {
-                throw new Exception("Creating a review failed on save.");
+                throw new Exception($"Creating a game for review {reviewId} failed on save.");
             }
 
             var gameToReturn = Mapper.Map<GameDto>(gameEntity);
 
-            return CreatedAtRoute("GeReviewtGame",
-                new { id = gameToReturn.Id }, CreateLinksForGame(gameToReturn));
+            return CreatedAtRoute("GeReviewedGame",
+                new { reviewId = reviewId, id = gameToReturn.Id }, CreateLinksForGame(gameToReturn));
         }
 
         [HttpDelete("{id}", Name = "DeleteGame")]
@@ -136,7 +136,7 @@ namespace GameReviewApi.Controllers
         }
 
         [HttpPut("{id}", Name = "UpdateGame")]
-        public async Task<IActionResult> UpdateGame(int gameId, [FromBody] GameForUpdateDto game)
+        public async Task<IActionResult> UpdateGame(int reviewId, int gameId, [FromBody] GameForUpdateDto game)
         {
             if (game == null)
             {
@@ -158,7 +158,7 @@ namespace GameReviewApi.Controllers
                 return NotFound();
             }
 
-            var gameForReviewFromRepo = await _reviewRepository.GetGameById(gameId);
+            var gameForReviewFromRepo = await _reviewRepository.GetGameByReviewId(gameId, reviewId);
             if (gameForReviewFromRepo == null)
             {
                 return NotFound();

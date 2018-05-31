@@ -30,9 +30,9 @@ namespace GameReviewApi.Data
                 .WithOne(r => r.Review)
                 .HasForeignKey(c => c.ReviewId);
 
-            modelBuilder.Entity<Game>().ToTable("Game");
-            modelBuilder.Entity<Review>().ToTable("Review");
-            modelBuilder.Entity<Comment>().ToTable("Comment");
+            modelBuilder.Entity<Game>().ToTable("Games");
+            modelBuilder.Entity<Review>().ToTable("Reviews");
+            modelBuilder.Entity<Comment>().ToTable("Comments");
         }
     }
 }
