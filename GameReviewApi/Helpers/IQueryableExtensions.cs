@@ -83,30 +83,21 @@ namespace GameReviewApi.Helpers
                 return (IQueryable<object>)source;
             }
 
-            // ignore casing
             fields = fields.ToLower();
 
-            // the field are separated by ",", so we split it.
             var fieldsAfterSplit = fields.Split(',');
 
-            // select clause starts with "new" - will create anonymous objects
             var selectClause = "new (";
 
-            // run through the fields
             foreach (var field in fieldsAfterSplit)
             {
-                // trim each field, as it might contain leading 
-                // or trailing spaces. Can't trim the var in foreach,
-                // so use another var.
                 var propertyName = field.Trim();
 
-                // find the matching property
                 if (!mappingDictionary.ContainsKey(propertyName))
                 {
                     throw new ArgumentException($"Key mapping for {propertyName} is missing");
                 }
 
-                // get the PropertyMappingValue
                 var propertyMappingValue = mappingDictionary[propertyName];
 
                 if (propertyMappingValue == null)
@@ -114,15 +105,12 @@ namespace GameReviewApi.Helpers
                     throw new ArgumentNullException("propertyMappingValue");
                 }
 
-                // Run through the destination property names
                 foreach (var destinationProperty in propertyMappingValue.DestinationProperties)
                 {
-                    // add to select clause
                     selectClause += $" {destinationProperty},";
                 }
             }
 
-            // remove last comma, add closing arrow and execute select clause
             selectClause = selectClause.Substring(0, selectClause.Length - 1) + ")";
             return (IQueryable<object>)source.Select(selectClause);
         }

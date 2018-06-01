@@ -142,7 +142,7 @@ namespace GameReviewApi
 
             });
 
-            reviewContext.EnsureSeedDataForContext();
+            //reviewContext.EnsureSeedDataForContext();
 
             app.UseResponseCaching();
 

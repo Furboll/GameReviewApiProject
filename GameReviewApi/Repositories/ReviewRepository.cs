@@ -25,19 +25,16 @@ namespace GameReviewApi.Repositories
         public async Task AddReview(Review review)
         {
             await _context.Reviews.AddAsync(review);
-            //await _context.SaveChangesAsync();
         }
 
         public async Task AddGame(Game game)
         {
             await _context.Games.AddAsync(game);
-            //await _context.SaveChangesAsync();
         }
 
         public async Task AddComment(Comment comment)
         {
             await _context.Comments.AddAsync(comment);
-            //await _context.SaveChangesAsync();
         }
 
         public async Task<Comment> GetCommentById(int Id)
@@ -149,7 +146,6 @@ namespace GameReviewApi.Repositories
             if (itemToRemove != null)
             {
                 _context.Comments.Remove(itemToRemove);
-                //await _context.SaveChangesAsync();
             }
         }
 
@@ -159,7 +155,6 @@ namespace GameReviewApi.Repositories
             if (itemToRemove != null)
             {
                 _context.Games.Remove(itemToRemove);
-                //await _context.SaveChangesAsync();
             }
         }
 
@@ -169,7 +164,6 @@ namespace GameReviewApi.Repositories
             if (itemToRemove != null)
             {
                 _context.Reviews.Remove(itemToRemove);
-                //await _context.SaveChangesAsync();
             }
         }
 
@@ -195,12 +189,10 @@ namespace GameReviewApi.Repositories
 
         public async Task UpdateGame(Game game)
         {
-            //throw new NotImplementedException();
         }
 
         public async Task UpdateComment(Comment comment)
         {
-            //throw new NotImplementedException();
         }
 
         public async Task<bool> ReviewExists(int reviewId)

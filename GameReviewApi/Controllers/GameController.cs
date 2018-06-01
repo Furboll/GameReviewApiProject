@@ -30,14 +30,14 @@ namespace GameReviewApi.Controllers
         }
 
         [HttpGet(Name = "GetReviewedGames")]
-        public async Task<IActionResult> GetReviewedGames(int reviewId, int gameId)
+        public async Task<IActionResult> GetReviewedGames(int reviewId) //, int gameId)
         {
             if (!await _reviewRepository.ReviewExists(reviewId))
             {
                 return NotFound();
             }
 
-            var gameForReviewFromDb = _reviewRepository.GetGameByReviewId(reviewId, gameId);
+            var gameForReviewFromDb = _reviewRepository.GetGameByReviewId(reviewId) //, gameId);
 
             var gameForReview = Mapper.Map<IEnumerable<GameDto>>(gameForReviewFromDb);
 

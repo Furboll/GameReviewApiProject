@@ -26,7 +26,8 @@ namespace GameReviewApi.Entities
         //[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime ReleaseDate { get; set; }
 
-        public int ReviewId { get; set; }
+        [ForeignKey("ReviewId")]
         public Review Review { get; set; }
+        public int ReviewId { get; set; }
     }
 }

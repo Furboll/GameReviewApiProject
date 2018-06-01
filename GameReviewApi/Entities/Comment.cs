@@ -21,7 +21,8 @@ namespace GameReviewApi.Entities
         [Required]
         public DateTime DatePosted { get; set; }
 
-        public int ReviewId { get; set; }
+        [ForeignKey("ReviewId")]
         public Review Review { get; set; }
+        public int ReviewId { get; set; }
     }
 }
