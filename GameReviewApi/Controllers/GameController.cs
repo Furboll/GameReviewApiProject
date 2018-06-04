@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 namespace GameReviewApi.Controllers
 {
     [Produces("application/json")]
-    [Route("api/reviews/{reviewId}/games")]
+    [Route("api/reviews/{reviewId}/game")]
     public class GameController : Controller
     {
         private IReviewRepository _reviewRepository;
@@ -29,38 +29,39 @@ namespace GameReviewApi.Controllers
             _urlHelper = urlHelper;
         }
 
-        [HttpGet(Name = "GetReviewedGames")]
-        public async Task<IActionResult> GetReviewedGames(int reviewId) //, int gameId)
+        //[HttpGet(Name = "GetReviewedGames")]
+        //public async Task<IActionResult> GetReviewedGames(int reviewId)
+        //{
+        //    if (!await _reviewRepository.ReviewExists(reviewId))
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    var gameForReviewFromDb = _reviewRepository.GetReviewedGames(reviewId);
+
+        //    var gameForReview = Mapper.Map<IEnumerable<GameDto>>(gameForReviewFromDb);
+
+        //    gameForReview = gameForReview.Select(game =>
+        //    {
+        //        game = CreateLinksForGame(game);
+        //        return game;
+        //    });
+
+        //    var wrapper = new LinkedCollectionResourceWrapperDto<GameDto>(gameForReview);
+
+        //    return Ok(CreateLinksForGames(wrapper));
+        //}
+
+        [HttpGet("{gameId}", Name = "GetGameForReview")]
+        public async Task<IActionResult> GetGameForReview(int reviewId, int gameId)
         {
             if (!await _reviewRepository.ReviewExists(reviewId))
             {
                 return NotFound();
             }
 
-            var gameForReviewFromDb = _reviewRepository.GetGameByReviewId(reviewId) //, gameId);
+            var gameReviewFromRepo = await _reviewRepository.GetGameForReview(reviewId, gameId);
 
-            var gameForReview = Mapper.Map<IEnumerable<GameDto>>(gameForReviewFromDb);
-
-            gameForReview = gameForReview.Select(game =>
-            {
-                game = CreateLinksForGame(game);
-                return game;
-            });
-
-            var wrapper = new LinkedCollectionResourceWrapperDto<GameDto>(gameForReview);
-
-            return Ok(CreateLinksForGames(wrapper));
-        }
-
-        [HttpGet("{id}", Name = "GetReviewForGame")]
-        public async Task<IActionResult> GetReviewForGame(int reviewId, int gameId)
-        {
-            if (!await _reviewRepository.ReviewExists(reviewId))
-            {
-                return NotFound();
-            }
-
-            var gameReviewFromRepo = await _reviewRepository.GetReviewByGameId(gameId, reviewId);
             if (gameReviewFromRepo == null)
             {
                 return NotFound();
@@ -95,7 +96,7 @@ namespace GameReviewApi.Controllers
 
             var gameEntity = Mapper.Map<Game>(game);
 
-            await _reviewRepository.AddGame(gameEntity);
+            await _reviewRepository.AddGame(reviewId, gameEntity);
 
             if (!await _reviewRepository.Save())
             {
@@ -104,7 +105,7 @@ namespace GameReviewApi.Controllers
 
             var gameToReturn = Mapper.Map<GameDto>(gameEntity);
 
-            return CreatedAtRoute("GeReviewedGame",
+            return CreatedAtRoute("GetReviewForGame",
                 new { reviewId = reviewId, id = gameToReturn.Id }, CreateLinksForGame(gameToReturn));
         }
 
@@ -116,7 +117,8 @@ namespace GameReviewApi.Controllers
                 return NotFound();
             }
 
-            var gameForReviewFromRepo = await _reviewRepository.GetGameByReviewId(gameId, reviewId);
+            var gameForReviewFromRepo = await _reviewRepository.GetGameForReview(reviewId, gameId);
+
             if (gameForReviewFromRepo == null)
             {
                 return NotFound();
@@ -158,7 +160,7 @@ namespace GameReviewApi.Controllers
                 return NotFound();
             }
 
-            var gameForReviewFromRepo = await _reviewRepository.GetGameByReviewId(gameId, reviewId);
+            var gameForReviewFromRepo = await _reviewRepository.GetGameForReview(reviewId, gameId);
             if (gameForReviewFromRepo == null)
             {
                 return NotFound();
@@ -191,7 +193,7 @@ namespace GameReviewApi.Controllers
                 return NotFound();
             }
 
-            var gameForReviewFromRepo = await _reviewRepository.GetGameByReviewId(gameId, reviewId);
+            var gameForReviewFromRepo = await _reviewRepository.GetGameForReview(reviewId, gameId);
 
             if (gameForReviewFromRepo == null)
             {

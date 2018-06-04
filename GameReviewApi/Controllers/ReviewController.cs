@@ -300,7 +300,7 @@ namespace GameReviewApi.Controllers
         }
 
         [HttpPatch("{id}", Name = "PartiallyUpdateReview")]
-        public async Task<IActionResult> PartiallyUpdateReview(int reviewId, int gameId,
+        public async Task<IActionResult> PartiallyUpdateReview(int reviewId,
             [FromBody] JsonPatchDocument<ReviewForUpdateDto> patchDoc)
         {
             if (patchDoc == null)
@@ -313,20 +313,20 @@ namespace GameReviewApi.Controllers
                 return NotFound();
             }
 
-            var reviewForGameFromRepo = await _reviewRepository.GetReviewByGameId(gameId, reviewId);
+            var reviewFromRepo = await _reviewRepository.GetReviewById(reviewId);
 
-            if (reviewForGameFromRepo == null)
+            if (reviewFromRepo == null)
             {
                 return NotFound();
             }
 
-            var reviewToPatch = Mapper.Map<ReviewForUpdateDto>(reviewForGameFromRepo);
+            var reviewToPatch = Mapper.Map<ReviewForUpdateDto>(reviewFromRepo);
 
             patchDoc.ApplyTo(reviewToPatch);
 
-            Mapper.Map(reviewToPatch, reviewForGameFromRepo);
+            Mapper.Map(reviewToPatch, reviewFromRepo);
 
-            await _reviewRepository.UpdateReview(reviewForGameFromRepo);
+            await _reviewRepository.UpdateReview(reviewFromRepo);
 
             if (!await _reviewRepository.Save())
             {
@@ -366,7 +366,7 @@ namespace GameReviewApi.Controllers
                 "POST"));
 
             links.Add(
-                new LinkDto(_urlHelper.Link("GetReviewForGame", new { reviewId = id }),
+                new LinkDto(_urlHelper.Link("GetGameForReview", new { reviewId = id }),
                 "game_review",
                 "GET"));
 

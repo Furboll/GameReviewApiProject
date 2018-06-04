@@ -9,36 +9,30 @@ namespace GameReviewApi.Repositories
 {
     public interface IReviewRepository
     {
-        Task AddReview(Review review);
         Task<PagedList<Review>> GetAllReviews(ReviewResourceParameters reviewResourceParameters);
-        Task<IEnumerable<Review>> GetAllReviews(IEnumerable<int> reviewIds);
         Task<Review> GetReviewById(int reviewId);
-        Task<Review> GetReviewByGameId(int gameId, int reviewId);
+        //Task<IEnumerable<Review>> GetAllReviews(IEnumerable<int> reviewIds);
+        //Task<Review> GetReviewByGameId(int gameId, int reviewId);
+        Task AddReview(Review review);
         Task DeleteReview(Review review);
         Task UpdateReview(Review review);
 
-        Task AddGame(Game game);
-        Task<IEnumerable<Game>> GetAllGames();
-        Task<Game> GetGameById(int gameId);
-        Task<Game> GetGameByReviewId(int gameId, int reviewId);
+        //Task<IEnumerable<Game>> GetAllGames();
+        //Task<Game> GetGameById(int gameId);
+        Task<Game> GetGameForReview(int reviewId, int gameId); //(int gameId, int reviewId);
+        Task AddGame(int reviewId, Game game);
         Task DeleteGame(Game game);
         Task UpdateGame(Game game);
 
-        Task AddComment(Comment comment);
-        Task<IEnumerable<Comment>> GetAllComments();
-        Task<Comment> GetCommentById(int commentId);
-        Task<Comment> GetCommentsByReviewId(int reviewId, int commentId);
+        //Task<IEnumerable<Comment>> GetAllComments();
+        Task<IEnumerable<Comment>> GetCommentsForReview(int reviewId);
+        //Task<Comment> GetCommentById(int commentId);
+        Task<Comment> GetCommentForReview(int reviewId, int commentId);
+        Task AddComment(int reviewId, Comment comment);
         Task DeleteComment(Comment comment);
         Task UpdateComment(Comment comment);
 
         Task<bool> ReviewExists(int reviewId);
         Task<bool> Save();
-        //Task<bool> ReviewExists(int reviewId);
-        //Task<Review> EditReviewAsync(int id);
-        //Task<Review> GetReviewByGameIdAsync(int id);
-        //Task<Review> GetReviewByIdAsync(int id);
-        //Task CreateReview(Review review);
-        //Task<List<Review>> GetAllReviewsAsync();
-        //Task<Review> GetLatestReview();
     }
 }

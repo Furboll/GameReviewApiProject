@@ -22,7 +22,9 @@ namespace GameReviewApi.Models
 
         public DateTime DatePosted { get; set; }
 
-        public Game Game { get; set; }
-        //public List<Comment> Comments { get; set; }
+        public GameForCreationDto Game { get; set; }
+
+        public ICollection<CommentForCreationDto> Comments { get; set; }
+        = new List<CommentForCreationDto>();
     }
 }

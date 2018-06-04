@@ -27,46 +27,47 @@ namespace GameReviewApi.Repositories
             await _context.Reviews.AddAsync(review);
         }
 
-        public async Task AddGame(Game game)
+        public async Task AddGame(int reviewId, Game game)
         {
             await _context.Games.AddAsync(game);
         }
 
-        public async Task AddComment(Comment comment)
+        public async Task AddComment(int reviewId, Comment comment)
         {
             await _context.Comments.AddAsync(comment);
         }
 
-        public async Task<Comment> GetCommentById(int Id)
+        public async Task<IEnumerable<Comment>> GetCommentsForReview(int reviewId)
         {
             return await _context.Comments
-                .Where(c => c.Id == Id)
-                .SingleOrDefaultAsync();
+                .Where(c => c.ReviewId == reviewId)
+                .OrderBy(c => c.Author)
+                .ToListAsync();
         }
 
-        public async Task<Comment> GetCommentsByReviewId(int reviewId, int commentID)
+        public async Task<Comment> GetCommentForReview(int reviewId, int commentID)
         {
             return await _context.Comments
                 .Where(c => c.ReviewId == reviewId && c.Id == commentID)
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<Game> GetGameById(int Id)
+        //public async Task<Game> GetGameById(int Id)
+        //{
+        //    return await _context.Games
+        //        .Where(g => g.Id == Id)
+        //        .SingleOrDefaultAsync();
+        //}
+
+        public async Task<Game> GetGameForReview(int reviewId, int gameId)
         {
-            return await _context.Games
-                .Where(g => g.Id == Id)
-                .SingleOrDefaultAsync();
+            return await _context.Games.Where(g => g.ReviewId == reviewId && g.Id == gameId).FirstOrDefaultAsync();
         }
 
-        public async Task<Game> GetGameByReviewId(int gameId, int reviewId)
-        {
-            return await _context.Games.Where(g => g.Id == gameId && g.ReviewId == reviewId).FirstOrDefaultAsync();
-        }
-
-        public async Task<Review> GetReviewByGameId(int reviewId, int gameId)
-        {
-            return await _context.Reviews.Where(r => r.Game.Id == gameId && r.Id == reviewId).FirstOrDefaultAsync();
-        }
+        //public async Task<Review> GetReviewByGameId(int reviewId, int gameId)
+        //{
+        //    return await _context.Reviews.Where(r => r.Game.Id == gameId && r.Id == reviewId).FirstOrDefaultAsync();
+        //}
 
         public async Task<Review> GetReviewById(int Id)
         {
@@ -75,15 +76,15 @@ namespace GameReviewApi.Repositories
                 .SingleOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<Comment>> GetAllComments()
-        {
-            return await _context.Comments.ToListAsync();
-        }
+        //public async Task<IEnumerable<Comment>> GetAllComments()
+        //{
+        //    return await _context.Comments.ToListAsync();
+        //}
 
-        public async Task<IEnumerable<Game>> GetAllGames()
-        {
-            return await _context.Games.ToListAsync();
-        }
+        //public async Task<IEnumerable<Game>> GetAllGames()
+        //{
+        //    return await _context.Games.ToListAsync();
+        //}
 
         public async Task<PagedList<Review>> GetAllReviews(ReviewResourceParameters reviewResourceParameters)
         {
@@ -132,13 +133,13 @@ namespace GameReviewApi.Repositories
             //    .ToListAsync();
         }
 
-        public async Task<IEnumerable<Review>> GetAllReviews(IEnumerable<int> reviewIds)
-        {
-            return await _context.Reviews.Where(a => reviewIds.Contains(a.Id))
-                .OrderBy(a => a.Author)
-                .OrderBy(a => a.ReviewTitle)
-                .ToListAsync();
-        }
+        //public async Task<IEnumerable<Review>> GetAllReviews(IEnumerable<int> reviewIds)
+        //{
+        //    return await _context.Reviews.Where(a => reviewIds.Contains(a.Id))
+        //        .OrderBy(a => a.Author)
+        //        .OrderBy(a => a.ReviewTitle)
+        //        .ToListAsync();
+        //}
 
         public async Task DeleteComment(Comment comment)
         {
