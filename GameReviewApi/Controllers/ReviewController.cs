@@ -268,19 +268,19 @@ namespace GameReviewApi.Controllers
         }
 
         [HttpPut("{id}", Name = "UpdateReview")]
-        public async Task<IActionResult> UpdateReview(int reviewId, [FromBody] ReviewForUpdateDto review)
+        public async Task<IActionResult> UpdateReview(int id, [FromBody] ReviewForUpdateDto review)
         {
             if (review == null)
             {
                 return BadRequest();
             }
 
-            if (!await _reviewRepository.ReviewExists(reviewId))
+            if (!await _reviewRepository.ReviewExists(id))
             {
                 return NotFound();
             }
 
-            var reviewForGameFromRepo = await _reviewRepository.GetReviewById(reviewId);
+            var reviewForGameFromRepo = await _reviewRepository.GetReviewById(id);
             if (reviewForGameFromRepo == null)
             {
                 return NotFound();
@@ -292,7 +292,7 @@ namespace GameReviewApi.Controllers
 
             if (!await _reviewRepository.Save())
             {
-                throw new Exception($"Updating game {reviewId} failed on save!");
+                throw new Exception($"Updating game {id} failed on save!");
             }
 
             return NoContent();
@@ -300,7 +300,7 @@ namespace GameReviewApi.Controllers
         }
 
         [HttpPatch("{id}", Name = "PartiallyUpdateReview")]
-        public async Task<IActionResult> PartiallyUpdateReview(int reviewId,
+        public async Task<IActionResult> PartiallyUpdateReview(int id,
             [FromBody] JsonPatchDocument<ReviewForUpdateDto> patchDoc)
         {
             if (patchDoc == null)
@@ -308,12 +308,12 @@ namespace GameReviewApi.Controllers
                 return BadRequest();
             }
 
-            if (!await _reviewRepository.ReviewExists(reviewId))
+            if (!await _reviewRepository.ReviewExists(id))
             {
                 return NotFound();
             }
 
-            var reviewFromRepo = await _reviewRepository.GetReviewById(reviewId);
+            var reviewFromRepo = await _reviewRepository.GetReviewById(id);
 
             if (reviewFromRepo == null)
             {
@@ -330,7 +330,7 @@ namespace GameReviewApi.Controllers
 
             if (!await _reviewRepository.Save())
             {
-                throw new Exception($"Failed to update review {reviewId}, try again.");
+                throw new Exception($"Failed to update review {id}, try again.");
             }
 
             return NoContent();

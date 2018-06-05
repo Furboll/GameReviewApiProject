@@ -124,21 +124,27 @@ namespace GameReviewApi
                 .ForMember(dest => dest.DatePosted, opt => opt.MapFrom(src =>
                 src.DatePosted.ToShortDateString()));
 
-                cfg.CreateMap<Models.ReviewForCreationDto, Entities.Review>();
-
-                cfg.CreateMap<Models.ReviewForUpdateDto, Entities.Review>();
-
                 cfg.CreateMap<Entities.Game, Models.GameDto>()
                 .ForMember(dest => dest.ReleaseDate, opt => opt.MapFrom(src =>
                 src.ReleaseDate.ToShortDateString()));
 
-                cfg.CreateMap<Models.GameForCreationDto, Entities.Game>();
-
-                cfg.CreateMap<Models.GameForUpdateDto, Entities.Game>();
-
                 cfg.CreateMap<Entities.Comment, Models.CommentDto>()
                 .ForMember(dest => dest.DatePosted, opt => opt.MapFrom(src =>
                 src.DatePosted.ToShortDateString()));
+
+                cfg.CreateMap<Models.ReviewForCreationDto, Entities.Review>();
+
+                cfg.CreateMap<Models.ReviewForUpdateDto, Entities.Review>();
+
+                cfg.CreateMap<Models.GameForCreationDto, Entities.Game>();                
+
+                cfg.CreateMap<Models.GameForUpdateDto, Entities.Game>();
+
+                cfg.CreateMap<Models.CommentForCreationDto, Entities.Comment>();
+
+                cfg.CreateMap<Models.CommentForUpdateDto, Entities.Comment>();
+
+                cfg.CreateMap<Entities.Comment, Models.CommentForUpdateDto>();
 
             });
 

@@ -1,11 +1,12 @@
-﻿using System;
+﻿using GameReviewApi.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace GameReviewApi.Models
 {
-    public class ReviewDto
+    public class ReviewDto : LinkedResourceBaseDto
     {
         public int Id { get; set; }
 
@@ -22,8 +23,5 @@ namespace GameReviewApi.Models
         public string Conclusion { get; set; }
 
         public string DatePosted { get; set; }
-
-        //public Game Game { get; set; }
-        //public List<Comment> Comments { get; set; }
     }
 }

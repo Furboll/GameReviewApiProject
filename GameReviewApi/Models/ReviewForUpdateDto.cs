@@ -18,7 +18,5 @@ namespace GameReviewApi.Models
         public string Body { get; set; }
 
         public string Conclusion { get; set; }
-
-        public DateTime DatePosted { get; set; }
     }
 }

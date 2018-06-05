@@ -13,7 +13,7 @@ namespace GameReviewApi.Models
         public string Title { get; set; }
 
         [Required(ErrorMessage = "You should fill out a genre")]
-        [MaxLength(20)]
+        [MaxLength(50)]
         public string Genre { get; set; }
 
         [Required(ErrorMessage = "You should fill out a publisher")]

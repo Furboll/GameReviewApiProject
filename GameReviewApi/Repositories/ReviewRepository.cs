@@ -34,7 +34,11 @@ namespace GameReviewApi.Repositories
 
         public async Task AddComment(int reviewId, Comment comment)
         {
-            await _context.Comments.AddAsync(comment);
+            var review = GetReviewById(reviewId);
+            if (review != null)
+            {
+                await _context.Comments.AddAsync(comment);
+            }
         }
 
         public async Task<IEnumerable<Comment>> GetCommentsForReview(int reviewId)

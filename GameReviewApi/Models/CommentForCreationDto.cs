@@ -5,10 +5,7 @@ using System.Threading.Tasks;
 
 namespace GameReviewApi.Models
 {
-    public class CommentForCreationDto
+    public class CommentForCreationDto : CommentForManipulationDto
     {
-        public string Author { get; set; }
-        public string CommentContent { get; set; }
-        public string DatePosted { get; set; }
     }
 }
