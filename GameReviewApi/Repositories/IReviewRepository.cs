@@ -17,7 +17,7 @@ namespace GameReviewApi.Repositories
         Task DeleteReview(Review review);
         Task UpdateReview(Review review);
 
-        //Task<IEnumerable<Game>> GetAllGames();
+        Task<Game> GetGamesForReview(int reviewId);
         //Task<Game> GetGameById(int gameId);
         Task<Game> GetGameForReview(int reviewId, int gameId); //(int gameId, int reviewId);
         Task AddGame(int reviewId, Game game);

@@ -103,8 +103,9 @@ namespace GameReviewApi.Controllers
 
             var commentToReturn = Mapper.Map<CommentDto>(commentEntity);
 
-            return CreatedAtRoute("GetCommentForGame",
-                new { reviewId = reviewId, id = commentToReturn.Id }, CreateLinksForComment(commentToReturn));
+            return CreatedAtRoute("GetCommentForReview",
+                new { reviewId = reviewId, id = commentToReturn.Id }, 
+                CreateLinksForComment(commentToReturn));
         }
 
         [HttpDelete("{id}", Name = "DeleteComment")]

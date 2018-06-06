@@ -140,6 +140,8 @@ namespace GameReviewApi
 
                 cfg.CreateMap<Models.GameForUpdateDto, Entities.Game>();
 
+                cfg.CreateMap<Entities.Game, Models.GameForUpdateDto>();
+
                 cfg.CreateMap<Models.CommentForCreationDto, Entities.Comment>();
 
                 cfg.CreateMap<Models.CommentForUpdateDto, Entities.Comment>();

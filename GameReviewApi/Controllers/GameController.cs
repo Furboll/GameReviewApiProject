@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 namespace GameReviewApi.Controllers
 {
     [Produces("application/json")]
-    [Route("api/reviews/{reviewId}/game")]
+    [Route("api/reviews/{reviewId}/games")]
     public class GameController : Controller
     {
         private IReviewRepository _reviewRepository;
@@ -29,28 +29,35 @@ namespace GameReviewApi.Controllers
             _urlHelper = urlHelper;
         }
 
-        //[HttpGet(Name = "GetReviewedGames")]
-        //public async Task<IActionResult> GetReviewedGames(int reviewId)
-        //{
-        //    if (!await _reviewRepository.ReviewExists(reviewId))
-        //    {
-        //        return NotFound();
-        //    }
+        [HttpGet(Name = "GetReviewedGames")]
+        public async Task<IActionResult> GetReviewedGames(int reviewId)
+        {
+            if (!await _reviewRepository.ReviewExists(reviewId))
+            {
+                return NotFound();
+            }
 
-        //    var gameForReviewFromDb = _reviewRepository.GetReviewedGames(reviewId);
+            var gameForReviewFromDb = await _reviewRepository.GetGamesForReview(reviewId);
 
-        //    var gameForReview = Mapper.Map<IEnumerable<GameDto>>(gameForReviewFromDb);
+            if (gameForReviewFromDb == null)
+            {
+                return NotFound();
+            }
 
-        //    gameForReview = gameForReview.Select(game =>
-        //    {
-        //        game = CreateLinksForGame(game);
-        //        return game;
-        //    });
+            var gameForReview = Mapper.Map<GameDto>(gameForReviewFromDb);
 
-        //    var wrapper = new LinkedCollectionResourceWrapperDto<GameDto>(gameForReview);
+            //var gameForReview = Mapper.Map<IEnumerable<GameDto>>(gameForReviewFromDb);
 
-        //    return Ok(CreateLinksForGames(wrapper));
-        //}
+            //gameForReview = gameForReview.Select(game =>
+            //{
+            //    game = CreateLinksForGame(game);
+            //    return game;
+            //});
+
+            //var wrapper = new LinkedCollectionResourceWrapperDto<GameDto>(gameForReview);
+
+            return Ok(CreateLinksForGame(gameForReview));
+        }
 
         [HttpGet("{gameId}", Name = "GetGameForReview")]
         public async Task<IActionResult> GetGameForReview(int reviewId, int gameId)
@@ -67,7 +74,8 @@ namespace GameReviewApi.Controllers
                 return NotFound();
             }
 
-            var reviewForGame = Mapper.Map<GameDto>(gameReviewFromRepo); //<-- needs to change most prob... cept I forgot to what X_X
+            var reviewForGame = Mapper.Map<GameDto>(gameReviewFromRepo);
+
             return Ok(CreateLinksForGame(reviewForGame));
         }
 

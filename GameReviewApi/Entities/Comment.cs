@@ -23,6 +23,7 @@ namespace GameReviewApi.Entities
 
         [ForeignKey("ReviewId")]
         public Review Review { get; set; }
+
         public int ReviewId { get; set; }
     }
 }

@@ -18,16 +18,16 @@ namespace GameReviewApi.Entities
 
         [Required]
         public string Publisher { get; set; }
-        [Required]
 
+        [Required]
         public string Developer { get; set; }
 
         [Required]
-        //[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime ReleaseDate { get; set; }
 
         [ForeignKey("ReviewId")]
         public Review Review { get; set; }
+
         public int ReviewId { get; set; }
     }
 }

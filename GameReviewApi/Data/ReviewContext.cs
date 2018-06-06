@@ -18,21 +18,21 @@ namespace GameReviewApi.Data
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Comment> Comments { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Review>()
-                .HasOne(g => g.Game)
-                .WithOne(r => r.Review)
-                .HasForeignKey<Game>(g => g.ReviewId);
+        //protected override void OnModelCreating(ModelBuilder modelBuilder)
+        //{
+        //    modelBuilder.Entity<Review>()
+        //        .HasOne(g => g.Game)
+        //        .WithOne(r => r.Review)
+        //        .HasForeignKey<Game>(g => g.ReviewId);
 
-            modelBuilder.Entity<Review>()
-                .HasMany(c => c.Comments)
-                .WithOne(r => r.Review)
-                .HasForeignKey(c => c.ReviewId);
+        //    modelBuilder.Entity<Review>()
+        //        .HasMany(c => c.Comments)
+        //        .WithOne(r => r.Review)
+        //        .HasForeignKey<Comment>(c => c.ReviewId);
 
-            modelBuilder.Entity<Game>().ToTable("Games");
-            modelBuilder.Entity<Review>().ToTable("Reviews");
-            modelBuilder.Entity<Comment>().ToTable("Comments");
-        }
+        //    modelBuilder.Entity<Game>().ToTable("Games");
+        //    modelBuilder.Entity<Review>().ToTable("Reviews");
+        //    modelBuilder.Entity<Comment>().ToTable("Comments");
+        //}
     }
 }
