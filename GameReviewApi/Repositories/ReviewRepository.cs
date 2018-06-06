@@ -29,7 +29,11 @@ namespace GameReviewApi.Repositories
 
         public async Task AddGame(int reviewId, Game game)
         {
-            await _context.Games.AddAsync(game);
+            var review = await _context.Reviews.FindAsync(reviewId);
+
+            review.Game = game;
+
+            _context.Reviews.Attach(review);
         }
 
         public async Task AddComment(int reviewId, Comment comment)
@@ -46,11 +50,6 @@ namespace GameReviewApi.Repositories
         public async Task<Game> GetGamesForReview(int reviewId)
         {
             return await _context.Games.Where(g => g.ReviewId == reviewId).SingleOrDefaultAsync();
-
-            //return await _context.Games
-            //    .Where(g => g.ReviewId == reviewId)
-            //    .OrderBy(g => g.Title)
-            //    .ToListAsync();
         }
 
         public async Task<IEnumerable<Comment>> GetCommentsForReview(int reviewId)
@@ -154,22 +153,7 @@ namespace GameReviewApi.Repositories
 
         public async Task UpdateReview(Review review)
         {
-            //var itemToUpdate = await _context.Reviews.SingleOrDefaultAsync(r => r.Id == review.Id);
 
-            //if (itemToUpdate != null)
-            //{
-            //    itemToUpdate.ReviewTitle = review.ReviewTitle;
-            //    itemToUpdate.Author = review.Author;
-            //    itemToUpdate.VideoUrl = review.VideoUrl;
-            //    itemToUpdate.Introduction = review.Introduction;
-            //    itemToUpdate.Body = review.Body;
-            //    itemToUpdate.Conclusion = review.Conclusion;
-            //    itemToUpdate.DatePosted = review.DatePosted;
-
-            //    //itemToUpdate.Game = review.Game;
-            //    //itemToUpdate.Comments = review.Comments;
-            //    //May or may not be needed
-            //}
         }
 
         public async Task UpdateGame(Game game)

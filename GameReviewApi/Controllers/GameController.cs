@@ -46,38 +46,28 @@ namespace GameReviewApi.Controllers
 
             var gameForReview = Mapper.Map<GameDto>(gameForReviewFromDb);
 
-            //var gameForReview = Mapper.Map<IEnumerable<GameDto>>(gameForReviewFromDb);
-
-            //gameForReview = gameForReview.Select(game =>
-            //{
-            //    game = CreateLinksForGame(game);
-            //    return game;
-            //});
-
-            //var wrapper = new LinkedCollectionResourceWrapperDto<GameDto>(gameForReview);
-
             return Ok(CreateLinksForGame(gameForReview));
         }
 
-        [HttpGet("{gameId}", Name = "GetGameForReview")]
-        public async Task<IActionResult> GetGameForReview(int reviewId, int gameId)
-        {
-            if (!await _reviewRepository.ReviewExists(reviewId))
-            {
-                return NotFound();
-            }
+        //[HttpGet("{gameId}", Name = "GetGameForReview")]
+        //public async Task<IActionResult> GetGameForReview(int reviewId, int gameId)
+        //{
+        //    if (!await _reviewRepository.ReviewExists(reviewId))
+        //    {
+        //        return NotFound();
+        //    }
 
-            var gameReviewFromRepo = await _reviewRepository.GetGameForReview(reviewId, gameId);
+        //    var gameReviewFromRepo = await _reviewRepository.GetGameForReview(reviewId, gameId);
 
-            if (gameReviewFromRepo == null)
-            {
-                return NotFound();
-            }
+        //    if (gameReviewFromRepo == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var reviewForGame = Mapper.Map<GameDto>(gameReviewFromRepo);
+        //    var reviewForGame = Mapper.Map<GameDto>(gameReviewFromRepo);
 
-            return Ok(CreateLinksForGame(reviewForGame));
-        }
+        //    return Ok(CreateLinksForGame(reviewForGame));
+        //}
 
         [HttpPost(Name = "CreateGameForReview")]
         public async Task<IActionResult> CreateGameForReview(int reviewId, [FromBody] GameForCreationDto game)
@@ -113,11 +103,11 @@ namespace GameReviewApi.Controllers
 
             var gameToReturn = Mapper.Map<GameDto>(gameEntity);
 
-            return CreatedAtRoute("GetReviewForGame",
+            return CreatedAtRoute("GetReviewedGames",
                 new { reviewId = reviewId, id = gameToReturn.Id }, CreateLinksForGame(gameToReturn));
         }
 
-        [HttpDelete("{id}", Name = "DeleteGame")]
+        [HttpDelete("{gameId}", Name = "DeleteGame")]
         public async Task<IActionResult> DeleteGame(int reviewId, int gameId)
         {
             if (!await _reviewRepository.ReviewExists(reviewId))
@@ -145,7 +135,7 @@ namespace GameReviewApi.Controllers
             return NoContent();
         }
 
-        [HttpPut("{id}", Name = "UpdateGame")]
+        [HttpPut("{gameId}", Name = "UpdateGame")]
         public async Task<IActionResult> UpdateGame(int reviewId, int gameId, [FromBody] GameForUpdateDto game)
         {
             if (game == null)
@@ -187,7 +177,7 @@ namespace GameReviewApi.Controllers
 
         }
 
-        [HttpPatch("{id}", Name = "PartiallyUpdateGame")]
+        [HttpPatch("{gameId}", Name = "PartiallyUpdateGame")]
         public async Task<IActionResult> PartiallyUpdateGame(int reviewId, int gameId,
             [FromBody] JsonPatchDocument<GameForUpdateDto> patchDoc)
         {
