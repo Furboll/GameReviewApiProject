@@ -35,7 +35,7 @@ namespace GameReviewApi.Controllers
                     "GET"));
 
                 links.Add(
-                    new LinkDto(_urlHelper.Link("CreateReviews", new { }),
+                    new LinkDto(_urlHelper.Link("CreateReview", new { }),
                     "self",
                     "POST"));
 
