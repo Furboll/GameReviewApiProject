@@ -30,12 +30,12 @@ namespace GameReviewApi.Controllers
                     "GET"));
 
                 links.Add(
-                    new LinkDto(_urlHelper.Link("GetAuthors", new { }),
+                    new LinkDto(_urlHelper.Link("GetReviews", new { }),
                     "self",
                     "GET"));
 
                 links.Add(
-                    new LinkDto(_urlHelper.Link("CreateAuthors", new { }),
+                    new LinkDto(_urlHelper.Link("CreateReviews", new { }),
                     "self",
                     "POST"));
 
